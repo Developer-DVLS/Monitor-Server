@@ -6,6 +6,8 @@ import { MonitorScheduler } from './schedulers/monitor.scheduler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SiteStatusSchema } from './entities/site-status.entity';
 import { SmsService } from './services/sms.service';
+import { ServiceBusClientProvider } from 'src/providers/ServiceBusClientProvider';
+import { EmailService } from './services/email.service';
 
 @Module({
   imports: [HttpModule, TypeOrmModule.forFeature([SiteStatusSchema])],
@@ -14,6 +16,8 @@ import { SmsService } from './services/sms.service';
     HealthCheckService,
     MonitorScheduler,
     SmsService,
+    ServiceBusClientProvider,
+    EmailService,
   ],
 })
 export class MonitorModule {}

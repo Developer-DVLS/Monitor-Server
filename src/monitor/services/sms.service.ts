@@ -16,8 +16,8 @@ export class SmsService {
 
   async sendAlert(
     status: SiteStatusSchema,
-    sendToPhone: string,
     type: 'Recovery' | 'Alert',
+    sendToPhone: string,
   ): Promise<void> {
     const message =
       type === 'Recovery'

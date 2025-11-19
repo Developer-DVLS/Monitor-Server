@@ -6,6 +6,9 @@ import { HttpModule } from '@nestjs/axios';
 import { MonitorModule } from './monitor/monitor.module';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MonitorController } from './monitor/monitor.controller';
+import { EmailService } from './monitor/services/email.service';
+import { ServiceBusClientProvider } from './providers/ServiceBusClientProvider';
 
 @Module({
   imports: [
@@ -20,7 +23,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     MonitorModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, MonitorController],
+  providers: [AppService, ServiceBusClientProvider, EmailService],
 })
 export class AppModule {}

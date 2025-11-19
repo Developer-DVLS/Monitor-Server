@@ -6,7 +6,7 @@ import { Site } from '../entities/site.entity';
 
 const Test_Sites = [
   {
-    name: 'Test Norbus',
+    name: 'Norbus',
     location: 'USA',
     frontend_url: 'https://frontend-norbus.chowchownow.com/',
     backend_url: 'https://api-norbus.chowchownow.com/',
@@ -18,7 +18,7 @@ const Test_Sites = [
     updated_date: '2025-09-02T12:57:54.672166',
   },
   {
-    name: 'Test Fuji',
+    name: 'Fuji',
     location: 'USA',
     frontend_url: 'https://frontend-fuji.chowchownow.com/',
     backend_url: 'https://api-fuji.chowchownow.com/',

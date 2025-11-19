@@ -4,6 +4,7 @@ import { HealthCheckService } from '../services/health-check.service';
 import { SiteFetchService } from '../services/site-fetch.service';
 import { SmsService } from '../services/sms.service';
 import { ConfigService } from '@nestjs/config';
+import { EmailService } from '../services/email.service';
 
 @Injectable()
 export class MonitorScheduler {
@@ -14,6 +15,7 @@ export class MonitorScheduler {
     private healthCheck: HealthCheckService,
     private sms: SmsService,
     private config: ConfigService,
+    private sendMail: EmailService,
   ) {
     this.siteFetch.fetchSites();
   }
@@ -30,14 +32,18 @@ export class MonitorScheduler {
     const promises = sites.map((site) => this.healthCheck.checkSite(site));
     const statuses = await Promise.all(promises);
 
-    const sendToPhone = this.config.get('SEND_TO_PHONE');
+    const sendToPhone = this.config.get('SEND_TO_PHONE') || '+9779764596223';
+    const sendToEmail =
+      this.config.get('SEND_TO_EMAIL') || 'p.awale@mydvls.com';
 
     for (const status of statuses) {
       if ((status as any).shouldAlert) {
-        await this.sms.sendAlert(status, sendToPhone, 'Alert');
+        await this.sms.sendAlert(status, 'Alert', sendToPhone);
+        this.sendMail.sendMessage(status, 'Alert', sendToEmail);
       }
       if ((status as any).recoveryAlert) {
-        await this.sms.sendAlert(status, sendToPhone, 'Recovery');
+        await this.sms.sendAlert(status, 'Recovery', sendToPhone);
+        this.sendMail.sendMessage(status, 'Recovery', sendToEmail);
       }
     }
   }
