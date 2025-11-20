@@ -34,7 +34,7 @@ export class MonitorScheduler {
 
     const sendToPhone = this.config.get('SEND_TO_PHONE') || '+9779764596223';
     const sendToEmail =
-      this.config.get('SEND_TO_EMAIL') || 'p.awale@mydvls.com';
+      this.config.get('SEND_TO_EMAIL')?.split(':') || 'p.awale@mydvls.com';
 
     for (const status of statuses) {
       if ((status as any).shouldAlert) {

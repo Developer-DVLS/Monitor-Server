@@ -21,7 +21,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   async sendMessage(
     siteDetails: SiteStatusSchema,
     type: 'Recovery' | 'Alert',
-    sendToEmail: string,
+    sendToEmail: string | string[],
   ): Promise<void> {
     const isAlert = type === 'Alert';
     try {
