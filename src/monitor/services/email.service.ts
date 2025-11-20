@@ -138,9 +138,9 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
             <h2>Recommended Actions</h2>
             <ol>
               <li><strong>Verify Alert:</strong> Manually check the site URL and backend endpoints (e.g., /auth/).</li>
-              <li><strong>Investigate Logs:</strong> Review server logs on AWS/EC2 (or your hosting provider) for errors around ${siteDetails.lastChecked.toISOString()}.</li>
+              <li><strong>Investigate Logs:</strong> Review server logs on Azure for errors around ${siteDetails.lastChecked.toISOString()}.</li>
               <li><strong>Restart Services:</strong> Attempt to restart frontend (e.g., PM2/Nginx) and backend (e.g., Django/Nginx) processes.</li>
-              <li><strong>Check Dependencies:</strong> Validate database connectivity, CDN status, and any third-party services (e.g., ChowNow integrations).</li>
+              <li><strong>Check Dependencies:</strong> Validate database connectivity and any third-party services.</li>
               <li><strong>Escalate if Needed:</strong> If unresolved in 15 mins, notify on-call Individual.</li>
             </ol>
             <p><em>Monitoring Tool:</em> Automated health check cronjob (Ping/HTTP probe every 30secs).</p>
