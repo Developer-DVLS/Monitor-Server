@@ -54,12 +54,11 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
           isAlert
             ? `
         <div class="header">
-          <h1>🚨 SITE ALERT: ${siteDetails.site.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'} Detected</h1>
-          <p><strong>Priority: CRITICAL</strong> - Service disruption impacting users</p>
+          <h1>${siteDetails.site.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'} Incident Detected</h1>
         </div>`
             : `
         <div class="header">
-          <h1>✅ SITE Online: Norbus Server Back To Online</h1>
+          <h1>SITE Online: Norbus Server Back To Online</h1>
         </div>
         `
         }
@@ -131,23 +130,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
             </tbody>
           </table>
 
-          ${
-            isAlert
-              ? `
-          <div class="action-box">
-            <h2>Recommended Actions</h2>
-            <ol>
-              <li><strong>Verify Alert:</strong> Manually check the site URL and backend endpoints (e.g., /auth/).</li>
-              <li><strong>Investigate Logs:</strong> Review server logs on Azure for errors around ${siteDetails.lastChecked.toISOString()}.</li>
-              <li><strong>Restart Services:</strong> Attempt to restart frontend (e.g., PM2/Nginx) and backend (e.g., Django/Nginx) processes.</li>
-              <li><strong>Check Dependencies:</strong> Validate database connectivity and any third-party services.</li>
-              <li><strong>Escalate if Needed:</strong> If unresolved in 15 mins, notify on-call Individual.</li>
-            </ol>
-            <p><em>Monitoring Tool:</em> Automated health check cronjob (Ping/HTTP probe every 30secs).</p>
-          </div>
-          `
-              : ''
-          }
+         
 
           
           <div class="footer">
@@ -171,3 +154,21 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     await this.sender.close();
   }
 }
+
+//  ${
+//             isAlert
+//               ? `
+//           <div class="action-box">
+//             <h2>Recommended Actions</h2>
+//             <ol>
+//               <li><strong>Verify Alert:</strong> Manually check the site URL and backend endpoints (e.g., /auth/).</li>
+//               <li><strong>Investigate Logs:</strong> Review server logs on Azure for errors around ${siteDetails.lastChecked.toISOString()}.</li>
+//               <li><strong>Restart Services:</strong> Attempt to restart frontend (e.g., PM2/Nginx) and backend (e.g., Django/Nginx) processes.</li>
+//               <li><strong>Check Dependencies:</strong> Validate database connectivity and any third-party services.</li>
+//               <li><strong>Escalate if Needed:</strong> If unresolved in 15 mins, notify on-call Individual.</li>
+//             </ol>
+//             <p><em>Monitoring Tool:</em> Automated health check cronjob (Ping/HTTP probe every 30secs).</p>
+//           </div>
+//           `
+//               : ''
+//           }
