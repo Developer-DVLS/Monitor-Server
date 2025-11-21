@@ -27,7 +27,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.sender.sendMessages({
         body: {
-          message: 'Norbus Site Server Alert',
+          message: `${siteDetails.site.name}} Site Server Alert`,
           service_type: 'email',
           to_email: sendToEmail,
           subject: isAlert
@@ -58,7 +58,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
         </div>`
             : `
         <div class="header">
-          <h1>SITE Online: Norbus Server Back To Online</h1>
+          <h1>SITE Online: ${siteDetails.site.name} Server Back To Online</h1>
         </div>
         `
         }
