@@ -38,11 +38,11 @@ export class MonitorScheduler {
 
     for (const status of statuses) {
       if ((status as any).shouldAlert) {
-        await this.sms.sendAlert(status, 'Alert', sendToPhone);
+        // await this.sms.sendAlert(status, 'Alert', sendToPhone);
         this.sendMail.sendMessage(status, 'Alert', sendToEmail);
       }
       if ((status as any).recoveryAlert) {
-        await this.sms.sendAlert(status, 'Recovery', sendToPhone);
+        // await this.sms.sendAlert(status, 'Recovery', sendToPhone);
         this.sendMail.sendMessage(status, 'Recovery', sendToEmail);
       }
     }
