@@ -45,10 +45,9 @@ export class SiteFetchService {
     try {
       const url = this.config.get('DASH_SITE') + 'api/v1/restaurants/';
       // const response = await firstValueFrom(this.httpService.get(url));
-      // this.sites = response.data;
-      // this.logger.log(`Fetched ${this.sites.length} sites`);
-      // return this.sites;
-      return Test_Sites
+      this.sites = Test_Sites;
+      this.logger.log(`Fetched ${this.sites.length} sites`);
+      return this.sites;
     } catch (error) {
       this.logger.error('Failed to fetch sites', error);
       return this.sites;
