@@ -48,6 +48,7 @@ export class HealthCheckService {
 
     let shouldAlert = false;
     let recoveryAlert = false;
+
     if (previousStatus) {
       const wasUp = previousStatus.overallUp;
       if (wasUp && !overallUp) {
@@ -58,8 +59,14 @@ export class HealthCheckService {
         this.logger.log(`Recovery: Site ${site.name} is back UP`);
       }
     } else {
-      shouldAlert = false;
-      shouldAlert = false;
+      if(!overallUp){
+         shouldAlert = true;
+        this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
+      }else{
+
+        shouldAlert = false;
+        recoveryAlert=false
+      }
     }
 
     await this.statusRepo.save(newStatus);

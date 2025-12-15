@@ -37,6 +37,7 @@ export class MonitorScheduler {
       this.config.get('SEND_TO_EMAIL')?.split(':') || 'p.awale@mydvls.com';
 
     for (const status of statuses) {
+    
       if ((status as any).shouldAlert) {
         // await this.sms.sendAlert(status, 'Alert', sendToPhone);
         this.sendMail.sendMessage(status, 'Alert', sendToEmail);

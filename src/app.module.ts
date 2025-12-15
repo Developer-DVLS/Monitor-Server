@@ -16,7 +16,7 @@ import { ServiceBusClientProvider } from './providers/ServiceBusClientProvider';
     ScheduleModule.forRoot(),
     HttpModule,
     TypeOrmModule.forRoot({
-      type: 'sqlite',
+      type: 'better-sqlite3',
       database: 'site-status.db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,

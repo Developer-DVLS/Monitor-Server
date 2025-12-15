@@ -44,8 +44,8 @@ export class SiteFetchService {
   async fetchSites(): Promise<Site[]> {
     try {
       const url = this.config.get('DASH_SITE') + 'api/v1/restaurants/';
-      // const response = await firstValueFrom(this.httpService.get(url));
-      this.sites = Test_Sites;
+      const response = await firstValueFrom(this.httpService.get(url));
+      this.sites = response.data;
       this.logger.log(`Fetched ${this.sites.length} sites`);
       return this.sites;
     } catch (error) {
