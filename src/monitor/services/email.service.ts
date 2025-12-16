@@ -30,6 +30,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
           message: `${siteDetails.site.name}} Site Server Alert`,
           service_type: 'email',
           to_email: sendToEmail,
+          business:"monitor mydvls",
           subject: isAlert
             ? `🚨 CRITICAL: ${siteDetails.site.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'}  DOWN - Immediate Action Required!`
             : `🎉 Site Recovery: ${siteDetails.site.name} Server Online`,
