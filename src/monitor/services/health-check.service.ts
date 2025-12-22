@@ -59,13 +59,12 @@ export class HealthCheckService {
         this.logger.log(`Recovery: Site ${site.name} is back UP`);
       }
     } else {
-      if(!overallUp){
-         shouldAlert = true;
+      if (!overallUp) {
+        shouldAlert = true;
         this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
-      }else{
-
+      } else {
         shouldAlert = false;
-        recoveryAlert=false
+        recoveryAlert = false;
       }
     }
 
@@ -84,7 +83,7 @@ export class HealthCheckService {
   private async pingUrl(url: string): Promise<boolean> {
     try {
       const response: AxiosResponse = await firstValueFrom(
-        this.httpService.get(url, { timeout: 10000 }).pipe(timeout(10000)),
+        this.httpService.head(url, { timeout: 10000 }).pipe(timeout(10000)),
       );
       return response.status >= 200 && response.status < 300;
     } catch (error) {
