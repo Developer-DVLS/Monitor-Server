@@ -11,7 +11,7 @@ import { SiteStatusSchema } from '../entities/site-status.entity';
 @Injectable()
 export class HealthCheckService {
   private readonly logger = new Logger(HealthCheckService.name);
-  private statuses = new Map<number, SiteStatus>(); // In-memory store
+  private statuses = new Map<number, SiteStatus>();
 
   constructor(
     private httpService: HttpService,
@@ -37,14 +37,19 @@ export class HealthCheckService {
       where: { siteId: site.id },
     });
 
-    const newStatus = this.statusRepo.create({
-      siteId: site.id,
-      site,
-      ...frontend,
-      ...backend,
-      overallUp,
-      lastChecked: now,
-    });
+    const statusEntity =
+      previousStatus ||
+      this.statusRepo.create({
+        siteId: site.id,
+        createdAt: now,
+      });
+
+    statusEntity.site = site;
+    statusEntity.frontendUp = frontend.frontendUp;
+    statusEntity.backendUp = backend.backendUp;
+    statusEntity.overallUp = overallUp;
+    statusEntity.lastChecked = now;
+    statusEntity.updatedAt = now;
 
     let shouldAlert = false;
     let recoveryAlert = false;
@@ -68,16 +73,16 @@ export class HealthCheckService {
       }
     }
 
-    await this.statusRepo.save(newStatus);
+    await this.statusRepo.save(statusEntity);
 
     const duration = Date.now() - start;
     this.logger.log(
       `Checked ${site.name} in ${duration}ms: Frontend ${frontend.frontendUp ? 'UP' : 'DOWN'}, Backend ${backend.backendUp ? 'UP' : 'DOWN'}, Overall ${overallUp ? 'UP' : 'DOWN'}${shouldAlert ? ' → ALERT!' : ''}`,
     );
 
-    (newStatus as any).shouldAlert = shouldAlert;
-    (newStatus as any).recoveryAlert = recoveryAlert;
-    return newStatus;
+    (statusEntity as any).shouldAlert = shouldAlert;
+    (statusEntity as any).recoveryAlert = recoveryAlert;
+    return statusEntity;
   }
 
   private async pingUrl(url: string): Promise<boolean> {
@@ -94,10 +99,5 @@ export class HealthCheckService {
 
   getAllStatuses(): SiteStatus[] {
     return Array.from(this.statuses.values());
-  }
-
-  isDown(siteId: number, threshold = 2): boolean {
-    const status = this.statuses.get(siteId);
-    return status && status.consecutiveFailures >= threshold;
   }
 }
