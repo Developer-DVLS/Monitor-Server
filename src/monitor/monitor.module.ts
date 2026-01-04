@@ -8,9 +8,14 @@ import { SiteStatusSchema } from './entities/site-status.entity';
 import { SmsService } from './services/sms.service';
 import { ServiceBusClientProvider } from 'src/providers/ServiceBusClientProvider';
 import { EmailService } from './services/email.service';
+import { SitesSchema } from './entities/sites.entity';
+import { SeederService } from 'src/seeder/seeder.service';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([SiteStatusSchema])],
+  imports: [
+    HttpModule,
+    TypeOrmModule.forFeature([SiteStatusSchema, SitesSchema]),
+  ],
   providers: [
     SiteFetchService,
     HealthCheckService,
@@ -18,6 +23,7 @@ import { EmailService } from './services/email.service';
     SmsService,
     ServiceBusClientProvider,
     EmailService,
+    SeederService,
   ],
 })
 export class MonitorModule {}
