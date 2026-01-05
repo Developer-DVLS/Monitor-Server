@@ -1,5 +1,5 @@
-import { Module, Provider } from '@nestjs/common';
 import { ServiceBusClient } from '@azure/service-bus';
+import { Provider } from '@nestjs/common';
 import { createServiceBusClient } from 'src/configs/service-bus.config';
 
 export const ServiceBusClientProvider: Provider = {

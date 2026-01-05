@@ -1,17 +1,19 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from './services/email.service';
+import { SitesStatusService } from './services/site-status';
 
 @Controller('monitor')
 export class MonitorController {
   constructor(
     private sendMail: EmailService,
     private config: ConfigService,
+    private readonly sitesStatusService: SitesStatusService,
   ) {}
 
   @Get()
   getResponse() {
-    return 'monitor api route';
+    return this.sitesStatusService.getAllSitesStatus();
   }
 
   @Post()
@@ -25,14 +27,14 @@ export class MonitorController {
         lastChecked: new Date(),
         overallUp: false,
         site: {
-          name: 'Fuji',
+          name: 'Test Email',
           location: 'USA',
-          frontend_url: 'https://frontend-fuji.chowchownow.com/',
-          backend_url: 'https://api-fuji.chowchownow.com/',
-          code_name: '0017',
+          frontend_url: 'https://chowchowexpress.com/',
+          backend_url: 'https://chowchowexpress.com/',
+          code_name: '001',
           verification_phone_number: '',
-          logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTsYKdBXL69yll6ucTRfaUPGt5QmJhxgua_A&s',
-          id: 2,
+          logo: '',
+          id: 1,
           created_date: '2025-08-31T05:02:00.021733',
           updated_date: '2025-09-02T12:57:54.672166',
         },

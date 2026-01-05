@@ -3,8 +3,8 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SitesSchema } from '../monitor/entities/sites.entity';
 import { ConfigService } from '@nestjs/config';
+import { SitesSchema } from 'src/sites/entities/site.entity';
 
 @Injectable()
 export class SeederService {
