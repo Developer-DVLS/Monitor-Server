@@ -7,7 +7,7 @@ async function bootstrap() {
   const port = process.env.port || 3000;
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://monitor-mydvls.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
