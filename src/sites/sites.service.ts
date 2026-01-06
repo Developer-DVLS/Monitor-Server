@@ -9,12 +9,14 @@ import { Repository } from 'typeorm';
 import { SitesSchema } from './entities/site.entity'; // Adjust path if needed
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
+import { SslMonitorService } from 'src/monitor/services/ssl-check.service';
 
 @Injectable()
 export class SitesService {
   constructor(
     @InjectRepository(SitesSchema)
     private sitesRepo: Repository<SitesSchema>,
+    private siteSSLCheckService: SslMonitorService,
   ) {}
 
   async create(createSiteDto: CreateSiteDto): Promise<SitesSchema> {
@@ -27,7 +29,11 @@ export class SitesService {
         updated_date: now,
       });
 
-      return await this.sitesRepo.save(newSite);
+      const newCreateSite = await this.sitesRepo.save(newSite);
+
+      this.siteSSLCheckService.monitorAllSites();
+
+      return newCreateSite;
     } catch (error: any) {
       if (error.code === 'SQLITE_CONSTRAINT') {
         throw new BadRequestException(
@@ -125,9 +131,8 @@ export class SitesService {
 
       site.isActive = false;
       site.updated_date = new Date().toISOString();
-      await this.sitesRepo.save(site);
-
-      // await this.sitesRepo.remove(site);
+      // await this.sitesRepo.save(site);
+      await this.sitesRepo.remove(site);
 
       return { message: `Site with ID ${id} has been deactivated` };
     } catch (error) {

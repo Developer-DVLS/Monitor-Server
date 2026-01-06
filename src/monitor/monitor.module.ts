@@ -11,21 +11,31 @@ import { SmsService } from './services/sms.service';
 import { SitesSchema } from 'src/sites/entities/site.entity';
 import { SitesStatusService } from './services/site-status';
 import { MonitorController } from './monitor.controller';
+import { SSLCheckScheduler } from './schedulers/ssl-check.scheduler';
+import { SslMonitorService } from './services/ssl-check.service';
+import { SiteSSLStatusSchema } from './entities/site-ssl-status.entity';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([SiteStatusSchema, SitesSchema]),
+    TypeOrmModule.forFeature([
+      SiteStatusSchema,
+      SitesSchema,
+      SiteSSLStatusSchema,
+    ]),
   ],
   controllers: [MonitorController],
   providers: [
     SiteFetchService,
     HealthCheckService,
-    MonitorScheduler,
+    // MonitorScheduler,
     SmsService,
     ServiceBusClientProvider,
     EmailService,
     SitesStatusService,
+    SslMonitorService,
+    SSLCheckScheduler,
   ],
+  exports: [SslMonitorService],
 })
 export class MonitorModule {}

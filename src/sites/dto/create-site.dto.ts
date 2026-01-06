@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -32,6 +33,10 @@ export class CreateSiteDto {
   @IsUrl({}, { message: 'Invalid backend URL' })
   backend_url: string;
 
+  @IsNotEmpty({ message: 'Printer URL is required' })
+  @IsUrl({}, { message: 'Invalid printer URL' })
+  printer_url: string;
+
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
@@ -41,7 +46,7 @@ export class CreateSiteDto {
   @IsString({ each: true })
   subLocations?: string[];
 
-  @IsOptional()
-  @IsString()
-  locationId?: string;
+  @IsNotEmpty({ message: 'Location ID is required' })
+  @IsNumber()
+  location_id: number;
 }

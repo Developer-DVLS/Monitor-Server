@@ -2,6 +2,7 @@ import { Controller, Get, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from './services/email.service';
 import { SitesStatusService } from './services/site-status';
+import { SslMonitorService } from './services/ssl-check.service';
 
 @Controller('monitor')
 export class MonitorController {
@@ -9,6 +10,7 @@ export class MonitorController {
     private sendMail: EmailService,
     private config: ConfigService,
     private readonly sitesStatusService: SitesStatusService,
+    private readonly sitesSSLStatusService: SslMonitorService,
   ) {}
 
   @Get()
@@ -44,5 +46,10 @@ export class MonitorController {
       'Alert',
       sendToEmail,
     );
+  }
+
+  @Get('/ssl')
+  getAllSiteSSLStatus() {
+    return this.sitesSSLStatusService.findAll();
   }
 }
