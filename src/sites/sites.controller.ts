@@ -31,6 +31,11 @@ export class SitesController {
     return this.sitesService.findAll();
   }
 
+  @Get('all-locations-sites')
+  findAllLocationsSites() {
+    return this.siteLocationsService.findAllLocationSites();
+  }
+
   @Post('locations')
   createLocation(@Body() createSiteLocationDto: CreateSiteLocationDto) {
     return this.siteLocationsService.createLocation(createSiteLocationDto);

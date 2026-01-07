@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { SiteLocationsSchema } from '../entities/site-location.entity';
 import { CreateSiteLocationDto } from '../dto/create-site-location.dto';
 import { SitesSchema } from '../entities/site.entity';
+import { AllLocations } from 'src/types/sites';
 
 @Injectable()
 export class SiteLocationsService {
@@ -41,6 +42,11 @@ export class SiteLocationsService {
       if (!site)
         throw new BadRequestException('No site found with the provided ID');
 
+      if (site.location_id === createSiteLocationDto.location_id)
+        throw new BadRequestException(
+          'Loation ID cannot be same with main Location',
+        );
+
       const newSiteLocation = this.siteLocationsRepo.create({
         ...createSiteLocationDto,
         site,
@@ -70,6 +76,84 @@ export class SiteLocationsService {
           name: 'ASC',
         },
       });
+    } catch (error) {
+      console.error('Error fetching sites:', error);
+      throw new InternalServerErrorException('Failed to fetch sites');
+    }
+  }
+
+  async findAllLocationSites(): Promise<AllLocations[]> {
+    try {
+      const sites = await this.siteRepo.find({
+        order: {
+          name: 'ASC',
+        },
+        relations: {
+          siteLocations: true,
+        },
+      });
+      let allLocations: AllLocations[] = [];
+      for (const site of sites) {
+        const {
+          backend_url,
+          code_name,
+          frontend_url,
+          location,
+          location_id,
+          name,
+          printer_url,
+        } = site;
+
+        allLocations.push({
+          backend_url,
+          code_name,
+          frontend_url,
+          location,
+          location_id,
+          name,
+          printer_url,
+        });
+
+        const siteLocations = site.siteLocations;
+
+        for (const locations of siteLocations) {
+          allLocations.push({
+            backend_url,
+            code_name,
+            frontend_url,
+            location: locations.location,
+            location_id: locations.location_id,
+            name: locations.name,
+            printer_url,
+          });
+        }
+      }
+      return allLocations;
+
+      // const results = await this.siteRepo
+      //   .createQueryBuilder('site')
+      //   .innerJoin('site.siteLocations', 'loc')
+      //   .select([
+      //     'loc.name AS name',
+      //     'loc.location AS location',
+      //     'loc.location_id AS location_id',
+      //     'site.code_name AS code_name',
+      //     'site.frontend_url AS frontend_url',
+      //     'site.backend_url AS backend_url',
+      //     'site.printer_url AS printer_url',
+      //   ])
+      //   .orderBy('loc.name', 'ASC')
+      //   .getRawMany();
+
+      // return results.map((r) => ({
+      //   name: r.name,
+      //   location: r.location,
+      //   location_id: r.location_id,
+      //   code_name: r.code_name,
+      //   frontend_url: r.frontend_url,
+      //   backend_url: r.backend_url,
+      //   printer_url: r.printer_url,
+      // }));
     } catch (error) {
       console.error('Error fetching sites:', error);
       throw new InternalServerErrorException('Failed to fetch sites');

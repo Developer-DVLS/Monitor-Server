@@ -28,13 +28,13 @@ import { SiteSSLStatusSchema } from './entities/site-ssl-status.entity';
   providers: [
     SiteFetchService,
     HealthCheckService,
-    MonitorScheduler,
+    // MonitorScheduler,
     SmsService,
     ServiceBusClientProvider,
     EmailService,
     SitesStatusService,
     SslMonitorService,
-    SSLCheckScheduler,
+    // SSLCheckScheduler,
   ],
   exports: [SslMonitorService],
 })
