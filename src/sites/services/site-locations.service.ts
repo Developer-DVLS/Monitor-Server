@@ -1,43 +1,61 @@
 import {
-  BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SslMonitorService } from 'src/monitor/services/ssl-check.service';
 import { Repository } from 'typeorm';
-import { CreateSiteDto } from './dto/create-site.dto';
-import { SitesSchema } from './entities/site.entity';
+import { SiteLocationsSchema } from '../entities/site-location.entity';
+import { CreateSiteLocationDto } from '../dto/create-site-location.dto';
+import { SitesSchema } from '../entities/site.entity';
 
 @Injectable()
-export class SitesService {
+export class SiteLocationsService {
   constructor(
+    @InjectRepository(SiteLocationsSchema)
+    private siteLocationsRepo: Repository<SiteLocationsSchema>,
+
     @InjectRepository(SitesSchema)
-    private sitesRepo: Repository<SitesSchema>,
-    private siteSSLCheckService: SslMonitorService,
+    private siteRepo: Repository<SitesSchema>,
   ) {}
 
-  async create(createSiteDto: CreateSiteDto): Promise<SitesSchema> {
+  async createLocation(
+    createSiteLocationDto: CreateSiteLocationDto,
+  ): Promise<SiteLocationsSchema> {
+    if (
+      !createSiteLocationDto.siteId ||
+      isNaN(createSiteLocationDto.siteId) ||
+      createSiteLocationDto.siteId <= 0
+    ) {
+      throw new BadRequestException('Invalid site ID');
+    }
+
     const now = new Date().toISOString();
 
     try {
-      const newSite = this.sitesRepo.create({
-        ...createSiteDto,
+      const site = await this.siteRepo.findOne({
+        where: { id: createSiteLocationDto.siteId },
+      });
+
+      if (!site)
+        throw new BadRequestException('No site found with the provided ID');
+
+      const newSiteLocation = this.siteLocationsRepo.create({
+        ...createSiteLocationDto,
+        site,
         created_date: now,
         updated_date: now,
       });
 
-      const newCreateSite = await this.sitesRepo.save(newSite);
+      const newCreateSiteLocation =
+        await this.siteLocationsRepo.save(newSiteLocation);
 
-      this.siteSSLCheckService.monitorAllSites();
-
-      return newCreateSite;
+      return newCreateSiteLocation;
     } catch (error: any) {
+      console.log('Error');
       if (error.code === 'SQLITE_CONSTRAINT') {
-        throw new BadRequestException(
-          'A site with this code_name or unique field already exists.',
-        );
+        throw new BadRequestException('A site or unique field already exists.');
       }
 
       console.error('Error creating site:', error);
@@ -45,14 +63,11 @@ export class SitesService {
     }
   }
 
-  async findAll(): Promise<SitesSchema[]> {
+  async findAllLocations(): Promise<SiteLocationsSchema[]> {
     try {
-      return await this.sitesRepo.find({
+      return await this.siteLocationsRepo.find({
         order: {
           name: 'ASC',
-        },
-        relations: {
-          siteLocations: true,
         },
       });
     } catch (error) {
@@ -61,13 +76,13 @@ export class SitesService {
     }
   }
 
-  async findOne(id: number): Promise<SitesSchema> {
+  async findOneLocation(id: number): Promise<SiteLocationsSchema> {
     if (!id || isNaN(id) || id <= 0) {
       throw new BadRequestException('Invalid site ID');
     }
 
     try {
-      const site = await this.sitesRepo.findOne({
+      const site = await this.siteLocationsRepo.findOne({
         where: { id },
       });
 
@@ -88,22 +103,27 @@ export class SitesService {
     }
   }
 
-  async update(id: number, updateSiteDto: CreateSiteDto): Promise<SitesSchema> {
+  async updateSiteLocation(
+    id: number,
+    updateSiteLocationDto: CreateSiteLocationDto,
+  ): Promise<SiteLocationsSchema> {
     if (!id || isNaN(id) || id <= 0) {
       throw new BadRequestException('Invalid site ID');
     }
 
     try {
-      const site = await this.sitesRepo.findOne({ where: { id } });
+      const siteLocation = await this.siteLocationsRepo.findOne({
+        where: { id },
+      });
 
-      if (!site) throw new BadRequestException('Invalid site');
+      if (!siteLocation) throw new BadRequestException('Invalid site');
 
-      const updatedSite = this.sitesRepo.merge(site, {
-        ...updateSiteDto,
+      const updatedSiteLocation = this.siteLocationsRepo.merge(siteLocation, {
+        ...updateSiteLocationDto,
         updated_date: new Date().toISOString(),
       });
 
-      return await this.sitesRepo.save(updatedSite);
+      return await this.siteLocationsRepo.save(updatedSiteLocation);
     } catch (error: any) {
       if (error.code === 'SQLITE_CONSTRAINT') {
         throw new BadRequestException(
@@ -129,11 +149,12 @@ export class SitesService {
     }
 
     try {
-      const site = await this.sitesRepo.findOne({ where: { id } });
+      const site = await this.siteLocationsRepo.findOne({ where: { id } });
 
       site.isActive = false;
       site.updated_date = new Date().toISOString();
-      await this.sitesRepo.remove(site);
+      // await this.sitesRepo.save(site);
+      await this.siteLocationsRepo.remove(site);
 
       return { message: `Site with ID ${id} has been deactivated` };
     } catch (error) {

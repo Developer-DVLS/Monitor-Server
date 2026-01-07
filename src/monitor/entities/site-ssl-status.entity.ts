@@ -38,7 +38,4 @@ export class SiteSSLStatusSchema {
   })
   @JoinColumn({ name: 'siteId' })
   site: SitesSchema;
-
-  @Column()
-  siteId: number;
 }

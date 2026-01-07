@@ -5,7 +5,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.port || 3000;
-
+  app.setGlobalPrefix('api');
   app.enableCors();
 
   app.useGlobalPipes(

@@ -41,11 +41,6 @@ export class CreateSiteDto {
   @IsBoolean()
   isActive?: boolean;
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  subLocations?: string[];
-
   @IsNotEmpty({ message: 'Location ID is required' })
   @IsNumber()
   location_id: number;

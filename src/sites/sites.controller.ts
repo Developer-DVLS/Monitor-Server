@@ -1,11 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SitesService } from './sites.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { CreateSiteLocationDto } from './dto/create-site-location.dto';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
+import { SiteLocationsService } from './services/site-locations.service';
+import { SitesService } from './sites.service';
 
 @Controller('sites')
 export class SitesController {
-  constructor(private readonly sitesService: SitesService) {}
+  constructor(
+    private readonly sitesService: SitesService,
+
+    private readonly siteLocationsService: SiteLocationsService,
+  ) {}
 
   @Post()
   create(@Body() createSiteDto: CreateSiteDto) {
@@ -17,13 +31,36 @@ export class SitesController {
     return this.sitesService.findAll();
   }
 
+  @Post('locations')
+  createLocation(@Body() createSiteLocationDto: CreateSiteLocationDto) {
+    return this.siteLocationsService.createLocation(createSiteLocationDto);
+  }
+
+  @Patch('locations/:id')
+  updateLocation(
+    @Param('id') id: string,
+    @Body() updateSiteDto: CreateSiteLocationDto,
+  ) {
+    return this.siteLocationsService.updateSiteLocation(+id, updateSiteDto);
+  }
+
+  @Get('locations')
+  findAllLocations() {
+    return this.siteLocationsService.findAllLocations();
+  }
+
+  @Delete('locations/:id')
+  removeLocation(@Param('id') id: string) {
+    return this.siteLocationsService.remove(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sitesService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSiteDto: UpdateSiteDto) {
+  update(@Param('id') id: string, @Body() updateSiteDto: CreateSiteDto) {
     return this.sitesService.update(+id, updateSiteDto);
   }
 

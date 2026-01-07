@@ -1,5 +1,6 @@
 import { SiteSSLStatusSchema } from 'src/monitor/entities/site-ssl-status.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { SiteLocationsSchema } from './site-location.entity';
 
 @Entity('sites')
 export class SitesSchema {
@@ -11,6 +12,7 @@ export class SitesSchema {
   @Column()
   location: string;
 
+  @Column({ unique: true })
   @Column()
   code_name: string;
 
@@ -29,9 +31,6 @@ export class SitesSchema {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column('simple-json', { default: '[]' })
-  subLocations: string[];
-
   @Column({ default: 1 })
   location_id: number;
 
@@ -40,6 +39,11 @@ export class SitesSchema {
 
   @Column()
   updated_date: string;
+
+  @OneToMany(() => SiteLocationsSchema, (location) => location.site, {
+    cascade: true,
+  })
+  siteLocations: SiteLocationsSchema[];
 
   @OneToMany(() => SiteSSLStatusSchema, (ssl) => ssl.site, {
     cascade: true,
