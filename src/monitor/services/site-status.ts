@@ -11,6 +11,10 @@ export class SitesStatusService {
   ) {}
 
   async getAllSitesStatus() {
-    return await this.sitesStatusRepo.find();
+    return await this.sitesStatusRepo.find({
+      relations: {
+        siteLocation: true,
+      },
+    });
   }
 }

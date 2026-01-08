@@ -1,30 +1,29 @@
+import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
 import {
-  Entity,
-  PrimaryColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Site } from './site.entity';
 
 @Entity('site_status')
 export class SiteStatusSchema {
-  @PrimaryColumn()
-  siteId: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column('json')
-  site: Site;
-
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   frontendUp: boolean;
 
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   backendUp: boolean;
 
   @Column({ type: 'boolean', default: true })
   overallUp: boolean;
 
-  @Column({ type: 'date'})
+  @Column({ type: 'date' })
   lastChecked: Date;
 
   @CreateDateColumn()
@@ -32,4 +31,12 @@ export class SiteStatusSchema {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => AllSiteLocationSchema, (location) => location.siteStatus, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'siteId' })
+  siteLocation?: AllSiteLocationSchema;
 }

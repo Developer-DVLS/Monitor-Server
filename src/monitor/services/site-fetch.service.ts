@@ -1,33 +1,31 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { ConfigService } from '@nestjs/config';
-import { Site } from '../entities/site.entity';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SiteFetchService {
   private readonly logger = new Logger(SiteFetchService.name);
-  private sites: Site[] = [];
 
   constructor(
-    private httpService: HttpService,
-    private config: ConfigService,
+    @InjectRepository(AllSiteLocationSchema)
+    private allLocationSiteRepo: Repository<AllSiteLocationSchema>,
   ) {}
 
-  async fetchSites(): Promise<Site[]> {
+  async getSites(): Promise<AllSiteLocationSchema[]> {
     try {
-      const url = this.config.get('DASH_SITE') + 'api/v1/restaurants/';
-      const response = await firstValueFrom(this.httpService.get(url));
-      this.sites = response.data;
-      this.logger.log(`Fetched ${this.sites.length} sites`);
-      return this.sites;
+      return await this.allLocationSiteRepo.find({
+        order: {
+          name: 'ASC',
+        },
+      });
     } catch (error) {
-      this.logger.error('Failed to fetch sites', error);
-      return this.sites;
+      console.error('Error fetching sites:', error);
+      throw new InternalServerErrorException('Failed to fetch sites');
     }
-  }
-
-  getSites(): Site[] {
-    return this.sites;
   }
 }

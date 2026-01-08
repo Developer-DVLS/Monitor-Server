@@ -9,6 +9,8 @@ import { MonitorModule } from './monitor/monitor.module';
 import { EmailService } from './monitor/services/email.service';
 import { ServiceBusClientProvider } from './providers/ServiceBusClientProvider';
 import { SitesModule } from './sites/sites.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ApiSecretGuard } from './gaurds/api-secret.guard';
 
 @Module({
   imports: [
@@ -25,6 +27,14 @@ import { SitesModule } from './sites/sites.module';
     SitesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ServiceBusClientProvider, EmailService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ApiSecretGuard,
+    },
+    AppService,
+    ServiceBusClientProvider,
+    EmailService,
+  ],
 })
 export class AppModule {}

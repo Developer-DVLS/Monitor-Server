@@ -14,6 +14,7 @@ import { MonitorController } from './monitor.controller';
 import { SSLCheckScheduler } from './schedulers/ssl-check.scheduler';
 import { SslMonitorService } from './services/ssl-check.service';
 import { SiteSSLStatusSchema } from './entities/site-ssl-status.entity';
+import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
 
 @Module({
   imports: [
@@ -22,19 +23,20 @@ import { SiteSSLStatusSchema } from './entities/site-ssl-status.entity';
       SiteStatusSchema,
       SitesSchema,
       SiteSSLStatusSchema,
+      AllSiteLocationSchema,
     ]),
   ],
   controllers: [MonitorController],
   providers: [
     SiteFetchService,
     HealthCheckService,
-    // MonitorScheduler,
+    MonitorScheduler,
     SmsService,
     ServiceBusClientProvider,
     EmailService,
     SitesStatusService,
     SslMonitorService,
-    // SSLCheckScheduler,
+    SSLCheckScheduler,
   ],
   exports: [SslMonitorService],
 })

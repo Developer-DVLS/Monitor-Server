@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { SitesSchema } from './site.entity';
+import { AllSiteLocationSchema } from './all-location-site.entity';
 
 @Entity('site_locations')
 export class SiteLocationsSchema {
@@ -35,4 +37,10 @@ export class SiteLocationsSchema {
   })
   @JoinColumn({ name: 'siteId' })
   site: SitesSchema;
+
+  @OneToOne(() => AllSiteLocationSchema, (asl) => asl.siteLocation, {
+    cascade: ['insert', 'update', 'remove'],
+    nullable: true,
+  })
+  allSiteLocation?: AllSiteLocationSchema;
 }

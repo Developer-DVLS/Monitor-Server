@@ -9,12 +9,16 @@ import { SslMonitorService } from 'src/monitor/services/ssl-check.service';
 import { Repository } from 'typeorm';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { SitesSchema } from './entities/site.entity';
+import { AllSiteLocationSchema } from './entities/all-location-site.entity';
 
 @Injectable()
 export class SitesService {
   constructor(
     @InjectRepository(SitesSchema)
     private sitesRepo: Repository<SitesSchema>,
+    @InjectRepository(AllSiteLocationSchema)
+    private allLocationSiteRepo: Repository<AllSiteLocationSchema>,
+
     private siteSSLCheckService: SslMonitorService,
   ) {}
 
@@ -31,6 +35,11 @@ export class SitesService {
       const newCreateSite = await this.sitesRepo.save(newSite);
 
       this.siteSSLCheckService.monitorAllSites();
+
+      const allLoc = new AllSiteLocationSchema();
+
+      allLoc.site = newCreateSite;
+      await this.allLocationSiteRepo.save(allLoc);
 
       return newCreateSite;
     } catch (error: any) {

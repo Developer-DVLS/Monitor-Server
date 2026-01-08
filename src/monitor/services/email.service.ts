@@ -27,13 +27,13 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.sender.sendMessages({
         body: {
-          message: `${siteDetails.site.name}} Site Server Alert`,
+          message: `${siteDetails.siteLocation.name}} Site Server Alert`,
           service_type: 'email',
           to_email: sendToEmail,
-          business:"monitor mydvls",
+          business: 'monitor mydvls',
           subject: isAlert
-            ? `🚨 CRITICAL: ${siteDetails.site.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'}  DOWN - Immediate Action Required!`
-            : `🎉 Site Recovery: ${siteDetails.site.name} Server Online`,
+            ? `🚨 CRITICAL: ${siteDetails.siteLocation.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'}  DOWN - Immediate Action Required!`
+            : `🎉 Site Recovery: ${siteDetails.siteLocation.name} Server Online`,
           content: `
       <html>
         <head>
@@ -55,11 +55,11 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
           isAlert
             ? `
         <div class="header">
-          <h1>${siteDetails.site.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'} Incident Detected</h1>
+          <h1>${siteDetails.siteLocation.name} ${!siteDetails.backendUp && !siteDetails.backendUp ? `(Frontend & Backend)` : siteDetails.backendUp ? 'Frontend' : 'Backend'} Incident Detected</h1>
         </div>`
             : `
         <div class="header">
-          <h1>SITE Online: ${siteDetails.site.name} Server Back To Online</h1>
+          <h1>SITE Online: ${siteDetails.siteLocation.name} Server Back To Online</h1>
         </div>
         `
         }
@@ -73,14 +73,14 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
         ${
           !siteDetails.frontendUp
             ? `
-         <p><strong>Check Frontend URL:</strong> <a href="${siteDetails.site.frontend_url}" target="_blank" style="color: #007bff;">${siteDetails.site.frontend_url}</a></p>
+         <p><strong>Check Frontend URL:</strong> <a href="${siteDetails.siteLocation.frontend_url}" target="_blank" style="color: #007bff;">${siteDetails.siteLocation.frontend_url}</a></p>
         `
             : ``
         }
         ${
           !siteDetails.backendUp
             ? `
-         <p><strong>Check Backend URL:</strong> <a href="${siteDetails.site.backend_url}" target="_blank" style="color: #007bff;">${siteDetails.site.backend_url}</a></p>
+         <p><strong>Check Backend URL:</strong> <a href="${siteDetails.siteLocation.backend_url}" target="_blank" style="color: #007bff;">${siteDetails.siteLocation.backend_url}</a></p>
         `
             : ``
         }
@@ -112,7 +112,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
                 <td><span class="status-down">DOWN 🔴</span></td>
                 `
                 }
-                <td><a href="${siteDetails.site.frontend_url}" target="_blank">Frontend URL</a></td>
+                <td><a href="${siteDetails.siteLocation.frontend_url}" target="_blank">Frontend URL</a></td>
                 <td rowspan="2">${siteDetails.lastChecked.toISOString()}</td>
               </tr>
               <tr>
@@ -126,7 +126,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
                 <td><span class="status-down">DOWN 🔴</span></td>
                 `
                 }
-                <td><a href="${siteDetails.site.backend_url}" target="_blank">Backend URL</a></p></td>
+                <td><a href="${siteDetails.siteLocation.backend_url}" target="_blank">Backend URL</a></p></td>
               </tr>
             </tbody>
           </table>

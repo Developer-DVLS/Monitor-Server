@@ -21,8 +21,8 @@ export class SmsService {
   ): Promise<void> {
     const message =
       type === 'Recovery'
-        ? `🎉 Site ${status.site.name} Back Online!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nRecoverd At: ${status.lastChecked.toISOString()}`
-        : `🚨 Site ${status.site.name} DOWN!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nChecked: ${status.lastChecked.toISOString()}`;
+        ? `🎉 Site ${status.siteLocation.name} Back Online!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nRecoverd At: ${status.lastChecked.toISOString()}`
+        : `🚨 Site ${status.siteLocation.name} DOWN!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nChecked: ${status.lastChecked.toISOString()}`;
 
     const payload = {
       message,
@@ -40,16 +40,16 @@ export class SmsService {
       );
       if (response.status >= 200 && response.status < 300) {
         this.logger.log(
-          `SMS request sent successfully for site ${status.site.name} to ${sendToPhone}`,
+          `SMS request sent successfully for site ${status.siteLocation.name} to ${sendToPhone}`,
         );
       } else {
         this.logger.warn(
-          `SMS API responded with status ${response.status} for site ${status.site.name}`,
+          `SMS API responded with status ${response.status} for site ${status.siteLocation.name}`,
         );
       }
     } catch (error) {
       this.logger.error(
-        `Failed to send SMS for site ${status.site.name}:`,
+        `Failed to send SMS for site ${status.siteLocation.name}:`,
         error,
       );
       console.log('this is error', error);

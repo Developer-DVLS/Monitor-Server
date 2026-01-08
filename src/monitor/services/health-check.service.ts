@@ -1,88 +1,107 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { AxiosResponse } from 'axios';
-import { Site, SiteStatus } from '../entities/site.entity';
-import { timeout } from 'rxjs/operators';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosResponse } from 'axios';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
+import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
+import { Repository } from 'typeorm';
 import { SiteStatusSchema } from '../entities/site-status.entity';
 
 @Injectable()
 export class HealthCheckService {
   private readonly logger = new Logger(HealthCheckService.name);
-  private statuses = new Map<number, SiteStatus>();
 
   constructor(
     private httpService: HttpService,
+
     @InjectRepository(SiteStatusSchema)
     private statusRepo: Repository<SiteStatusSchema>,
   ) {}
 
-  async checkSite(site: Site): Promise<SiteStatusSchema> {
-    const start = Date.now();
-    const frontend$ = this.pingUrl(site.frontend_url).then((up) => ({
-      frontendUp: up,
-    }));
-    const backend$ = this.pingUrl(site.backend_url + 'auth').then((up) => ({
-      backendUp: up,
-    }));
+  async checkSite(site: AllSiteLocationSchema): Promise<SiteStatusSchema> {
+    try {
+      const start = Date.now();
 
-    const [frontend, backend] = await Promise.all([frontend$, backend$]);
-    const now = new Date();
+      const frontend$ = this.pingUrl(site.frontend_url).then((up) => ({
+        frontendUp: up,
+      }));
+      const backend$ = this.pingUrl(
+        site.backend_url.concat(
+          site.backend_url.endsWith('/') ? 'auth' : '/auth',
+        ),
+      ).then((up) => ({
+        backendUp: up,
+      }));
 
-    const overallUp = frontend.frontendUp && backend.backendUp;
+      const [frontend, backend] = await Promise.all([frontend$, backend$]);
+      const now = new Date();
 
-    const previousStatus = await this.statusRepo.findOne({
-      where: { siteId: site.id },
-    });
+      const overallUp = frontend.frontendUp && backend.backendUp;
 
-    const statusEntity =
-      previousStatus ||
-      this.statusRepo.create({
-        siteId: site.id,
-        createdAt: now,
+      const previousStatus = await this.statusRepo.findOne({
+        where: { siteLocation: site },
       });
 
-    statusEntity.site = site;
-    statusEntity.frontendUp = frontend.frontendUp;
-    statusEntity.backendUp = backend.backendUp;
-    statusEntity.overallUp = overallUp;
-    statusEntity.lastChecked = now;
-    statusEntity.updatedAt = now;
+      const statusEntity =
+        previousStatus ||
+        this.statusRepo.create({
+          siteLocation: site,
+          createdAt: now,
+        });
 
-    let shouldAlert = false;
-    let recoveryAlert = false;
+      statusEntity.frontendUp = frontend.frontendUp;
+      statusEntity.backendUp = backend.backendUp;
+      statusEntity.overallUp = overallUp;
+      statusEntity.lastChecked = now;
+      statusEntity.updatedAt = now;
+      statusEntity.siteLocation = site;
 
-    if (previousStatus) {
-      const wasUp = previousStatus.overallUp;
-      if (wasUp && !overallUp) {
-        shouldAlert = true;
-        this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
-      } else if (!wasUp && overallUp) {
-        recoveryAlert = true;
-        this.logger.log(`Recovery: Site ${site.name} is back UP`);
-      }
-    } else {
-      if (!overallUp) {
-        shouldAlert = true;
-        this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
+      let shouldAlert = false;
+      let recoveryAlert = false;
+
+      if (previousStatus) {
+        const wasUp = previousStatus.overallUp;
+        if (wasUp && !overallUp) {
+          shouldAlert = true;
+          this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
+        } else if (!wasUp && overallUp) {
+          recoveryAlert = true;
+          this.logger.log(`Recovery: Site ${site.name} is back UP`);
+        }
       } else {
-        shouldAlert = false;
-        recoveryAlert = false;
+        if (!overallUp) {
+          shouldAlert = true;
+          this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
+        } else {
+          shouldAlert = false;
+          recoveryAlert = false;
+        }
       }
+
+      await this.statusRepo.save(statusEntity);
+
+      const duration = Date.now() - start;
+      this.logger.log(
+        `Checked ${site.name} in ${duration}ms: Frontend ${frontend.frontendUp ? 'UP' : 'DOWN'}, Backend ${backend.backendUp ? 'UP' : 'DOWN'}, Overall ${overallUp ? 'UP' : 'DOWN'}${shouldAlert ? ' → ALERT!' : ''}`,
+      );
+
+      (statusEntity as any).shouldAlert = shouldAlert;
+      (statusEntity as any).recoveryAlert = recoveryAlert;
+      return statusEntity;
+    } catch (error) {
+      if (error.code === 'SQLITE_CONSTRAINT') {
+        throw new BadRequestException('Please recheck the payload');
+      }
+
+      console.error('Error creating site:', error);
+      throw new InternalServerErrorException('Failed to create site');
     }
-
-    await this.statusRepo.save(statusEntity);
-
-    const duration = Date.now() - start;
-    this.logger.log(
-      `Checked ${site.name} in ${duration}ms: Frontend ${frontend.frontendUp ? 'UP' : 'DOWN'}, Backend ${backend.backendUp ? 'UP' : 'DOWN'}, Overall ${overallUp ? 'UP' : 'DOWN'}${shouldAlert ? ' → ALERT!' : ''}`,
-    );
-
-    (statusEntity as any).shouldAlert = shouldAlert;
-    (statusEntity as any).recoveryAlert = recoveryAlert;
-    return statusEntity;
   }
 
   private async pingUrl(url: string): Promise<boolean> {
@@ -95,9 +114,5 @@ export class HealthCheckService {
       this.logger.warn(`Ping failed for ${url}: ${error.message}`);
       return false;
     }
-  }
-
-  getAllStatuses(): SiteStatus[] {
-    return Array.from(this.statuses.values());
   }
 }

@@ -16,14 +16,12 @@ export class MonitorScheduler {
     private sms: SmsService,
     private config: ConfigService,
     private sendMail: EmailService,
-  ) {
-    this.siteFetch.fetchSites();
-  }
+  ) {}
 
-  @Cron('*/30 * * * * *')
+  @Cron('*/10 * * * * *')
   async handleMonitorInterval() {
     this.logger.log('Starting monitoring cycle');
-    const sites = this.siteFetch.getSites();
+    const sites = await this.siteFetch.getSites();
     if (!sites.length) {
       this.logger.warn('No sites to monitor');
       return;
@@ -37,14 +35,15 @@ export class MonitorScheduler {
       this.config.get('SEND_TO_EMAIL')?.split(':') || 'p.awale@mydvls.com';
 
     for (const status of statuses) {
-    
       if ((status as any).shouldAlert) {
         // await this.sms.sendAlert(status, 'Alert', sendToPhone);
         this.sendMail.sendMessage(status, 'Alert', sendToEmail);
+        console.log('Down');
       }
       if ((status as any).recoveryAlert) {
         // await this.sms.sendAlert(status, 'Recovery', sendToPhone);
         this.sendMail.sendMessage(status, 'Recovery', sendToEmail);
+        console.log('Recored');
       }
     }
   }

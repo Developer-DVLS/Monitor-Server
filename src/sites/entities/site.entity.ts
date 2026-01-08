@@ -1,11 +1,20 @@
 import { SiteSSLStatusSchema } from 'src/monitor/entities/site-ssl-status.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SiteLocationsSchema } from './site-location.entity';
+import { AllSiteLocationSchema } from './all-location-site.entity';
 
 @Entity('sites')
 export class SitesSchema {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column()
   name: string;
 
@@ -13,7 +22,6 @@ export class SitesSchema {
   location: string;
 
   @Column({ unique: true })
-  @Column()
   code_name: string;
 
   @Column()
@@ -49,4 +57,10 @@ export class SitesSchema {
     cascade: true,
   })
   sslStatuses: SiteSSLStatusSchema[];
+
+  @OneToOne(() => AllSiteLocationSchema, (asl) => asl.site, {
+    cascade: ['insert', 'update', 'remove'],
+    nullable: true,
+  })
+  allSiteLocation?: AllSiteLocationSchema;
 }
