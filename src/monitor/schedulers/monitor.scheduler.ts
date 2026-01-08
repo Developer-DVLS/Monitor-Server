@@ -18,7 +18,7 @@ export class MonitorScheduler {
     private sendMail: EmailService,
   ) {}
 
-  @Cron('*/10 * * * * *')
+  @Cron('*/45 * * * * *')
   async handleMonitorInterval() {
     this.logger.log('Starting monitoring cycle');
     const sites = await this.siteFetch.getSites();
