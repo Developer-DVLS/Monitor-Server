@@ -77,6 +77,46 @@ export class SiteLocationsService {
     }
   }
 
+  async updateSiteLocation(
+    id: number,
+    updateSiteLocationDto: CreateSiteLocationDto,
+  ): Promise<SiteLocationsSchema> {
+    if (!id || isNaN(id) || id <= 0) {
+      throw new BadRequestException('Invalid site ID');
+    }
+
+    try {
+      const siteLocation = await this.siteLocationsRepo.findOne({
+        where: { id },
+      });
+
+      if (!siteLocation) throw new BadRequestException('Invalid site');
+
+      const updatedSiteLocation = this.siteLocationsRepo.merge(siteLocation, {
+        ...updateSiteLocationDto,
+        updated_date: new Date().toISOString(),
+      });
+
+      return await this.siteLocationsRepo.save(updatedSiteLocation);
+    } catch (error: any) {
+      if (error.code === 'SQLITE_CONSTRAINT') {
+        throw new BadRequestException(
+          'Update failed: code_name or unique field already exists',
+        );
+      }
+
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      console.error('Error updating site:', error);
+      throw new InternalServerErrorException('Failed to update site');
+    }
+  }
+
   async findAllLocations(): Promise<SiteLocationsSchema[]> {
     try {
       return await this.siteLocationsRepo.find({
@@ -125,46 +165,6 @@ export class SiteLocationsService {
       }
       console.error('Error finding site:', error);
       throw new InternalServerErrorException('Failed to fetch site');
-    }
-  }
-
-  async updateSiteLocation(
-    id: number,
-    updateSiteLocationDto: CreateSiteLocationDto,
-  ): Promise<SiteLocationsSchema> {
-    if (!id || isNaN(id) || id <= 0) {
-      throw new BadRequestException('Invalid site ID');
-    }
-
-    try {
-      const siteLocation = await this.siteLocationsRepo.findOne({
-        where: { id },
-      });
-
-      if (!siteLocation) throw new BadRequestException('Invalid site');
-
-      const updatedSiteLocation = this.siteLocationsRepo.merge(siteLocation, {
-        ...updateSiteLocationDto,
-        updated_date: new Date().toISOString(),
-      });
-
-      return await this.siteLocationsRepo.save(updatedSiteLocation);
-    } catch (error: any) {
-      if (error.code === 'SQLITE_CONSTRAINT') {
-        throw new BadRequestException(
-          'Update failed: code_name or unique field already exists',
-        );
-      }
-
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-
-      console.error('Error updating site:', error);
-      throw new InternalServerErrorException('Failed to update site');
     }
   }
 

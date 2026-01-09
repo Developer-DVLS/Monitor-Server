@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios'; // For better error typing
 import { SiteStatusSchema } from '../entities/site-status.entity';
+import { AlertCardPayload } from 'src/types/alret';
 
 @Injectable()
 export class SmsService {
@@ -13,6 +14,44 @@ export class SmsService {
     private httpService: HttpService,
     private config: ConfigService,
   ) {}
+
+  async sendAlertCard(
+    status: SiteStatusSchema,
+    payload: AlertCardPayload,
+  ): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(
+          this.config.get('SMS_MYDVLS') + '/teams_alerts/notify',
+          payload,
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 10000,
+          },
+        ),
+      );
+      if (response.status >= 200 && response.status < 300) {
+        this.logger.log(
+          `Card request sent successfully for site ${status.siteLocation.name}`,
+        );
+      } else {
+        this.logger.warn(
+          `SMS API responded with status ${response.status} for site ${status.siteLocation.name}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send SMS for site ${status.siteLocation.name}:`,
+        error,
+      );
+      console.log('this is error', error);
+      if (error instanceof AxiosError) {
+        this.logger.error(
+          `HTTP Error: ${error.response?.status} - ${error.response?.data || error.message}`,
+        );
+      }
+    }
+  }
 
   async sendAlert(
     status: SiteStatusSchema,

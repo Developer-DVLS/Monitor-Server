@@ -8,7 +8,7 @@
   "scripts": {
     "seed:db": "ts-node cli.ts seed:db",
     "deleteDb": "rm -f site-status.db",
-    "build": "npm run deleteDb && nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
