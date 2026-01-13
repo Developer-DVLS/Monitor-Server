@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { CreateSiteLocationDto } from './dto/create-site-location.dto';
 import { CreateSiteDto } from './dto/create-site.dto';
-import { UpdateSiteDto } from './dto/update-site.dto';
 import { SiteLocationsService } from './services/site-locations.service';
 import { SitesService } from './sites.service';
 

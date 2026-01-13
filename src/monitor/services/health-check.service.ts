@@ -13,6 +13,17 @@ import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.enti
 import { Repository } from 'typeorm';
 import { SiteStatusSchema } from '../entities/site-status.entity';
 
+interface HealthCheckResult extends SiteStatusSchema {
+  alertObject: {
+    backend: boolean;
+    frontend: boolean;
+  };
+  recoveryObject: {
+    backend: boolean;
+    frontend: boolean;
+  };
+}
+
 @Injectable()
 export class HealthCheckService {
   private readonly logger = new Logger(HealthCheckService.name);
@@ -24,13 +35,14 @@ export class HealthCheckService {
     private statusRepo: Repository<SiteStatusSchema>,
   ) {}
 
-  async checkSite(site: AllSiteLocationSchema): Promise<SiteStatusSchema> {
+  async checkSite(site: AllSiteLocationSchema): Promise<HealthCheckResult> {
     try {
       const start = Date.now();
 
       const frontend$ = this.pingUrl(site.frontend_url).then((up) => ({
         frontendUp: up,
       }));
+
       const backend$ = this.pingUrl(
         site.backend_url.concat(
           site.backend_url.endsWith('/') ? 'auth' : '/auth',
@@ -40,13 +52,22 @@ export class HealthCheckService {
       }));
 
       const [frontend, backend] = await Promise.all([frontend$, backend$]);
-      const now = new Date();
-
-      const overallUp = frontend.frontendUp && backend.backendUp;
+      const now = new Date().toISOString();
 
       const previousStatus = await this.statusRepo.findOne({
-        where: { siteLocation: site },
+        where: {
+          siteLocation: {
+            id: site.id,
+          },
+        },
       });
+
+      const currentFrontendStatus = frontend.frontendUp;
+      const currentBackendStatus = backend.backendUp;
+      const previousFrontendStatus = previousStatus?.frontendUp;
+      const previousBackendStatus = previousStatus?.backendUp;
+
+      let healthCheckResult: HealthCheckResult = null;
 
       const statusEntity =
         previousStatus ||
@@ -57,30 +78,49 @@ export class HealthCheckService {
 
       statusEntity.frontendUp = frontend.frontendUp;
       statusEntity.backendUp = backend.backendUp;
-      statusEntity.overallUp = overallUp;
       statusEntity.lastChecked = now;
       statusEntity.updatedAt = now;
       statusEntity.siteLocation = site;
 
-      let shouldAlert = false;
-      let recoveryAlert = false;
+      const alertObject = {
+        frontend: false,
+        backend: false,
+      };
+      let recoveryObject = {
+        frontend: false,
+        backend: false,
+      };
 
       if (previousStatus) {
-        const wasUp = previousStatus.overallUp;
-        if (wasUp && !overallUp) {
-          shouldAlert = true;
-          this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
-        } else if (!wasUp && overallUp) {
-          recoveryAlert = true;
-          this.logger.log(`Recovery: Site ${site.name} is back UP`);
+        if (currentBackendStatus && !previousBackendStatus) {
+          statusEntity.backendlastUp = now;
+          recoveryObject.backend = true;
+        }
+        if (!currentBackendStatus && previousBackendStatus) {
+          statusEntity.backendlastDown = now;
+          alertObject.backend = true;
+        }
+        if (currentFrontendStatus && !previousFrontendStatus) {
+          statusEntity.frontendlastUp = now;
+          recoveryObject.frontend = true;
+        }
+        if (!currentFrontendStatus && previousFrontendStatus) {
+          statusEntity.frontendlastDown = now;
+          alertObject.frontend = true;
         }
       } else {
-        if (!overallUp) {
-          shouldAlert = true;
-          this.logger.warn(`Transition detected: Site ${site.name} went DOWN`);
+        if (currentBackendStatus) {
+          statusEntity.backendlastUp = now;
         } else {
-          shouldAlert = false;
-          recoveryAlert = false;
+          statusEntity.backendlastDown = now;
+          alertObject.backend = true;
+        }
+
+        if (currentFrontendStatus) {
+          statusEntity.frontendlastUp = now;
+        } else {
+          statusEntity.frontendlastDown = now;
+          alertObject.frontend = true;
         }
       }
 
@@ -88,12 +128,12 @@ export class HealthCheckService {
 
       const duration = Date.now() - start;
       this.logger.log(
-        `Checked ${site.name} in ${duration}ms: Frontend ${frontend.frontendUp ? 'UP' : 'DOWN'}, Backend ${backend.backendUp ? 'UP' : 'DOWN'}, Overall ${overallUp ? 'UP' : 'DOWN'}${shouldAlert ? ' → ALERT!' : ''}`,
+        `Checked ${site.name} in ${duration}ms: Frontend ${frontend.frontendUp ? 'UP' : 'DOWN'}, Backend ${backend.backendUp ? 'UP' : 'DOWN'}`,
       );
 
-      (statusEntity as any).shouldAlert = shouldAlert;
-      (statusEntity as any).recoveryAlert = recoveryAlert;
-      return statusEntity;
+      healthCheckResult = { ...statusEntity, alertObject, recoveryObject };
+
+      return healthCheckResult;
     } catch (error) {
       if (error.code === 'SQLITE_CONSTRAINT') {
         throw new BadRequestException('Please recheck the payload');

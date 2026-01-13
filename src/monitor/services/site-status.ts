@@ -17,4 +17,18 @@ export class SitesStatusService {
       },
     });
   }
+
+  async getAllSitesLatestStatus() {
+    return await this.sitesStatusRepo
+      .createQueryBuilder('status')
+      .leftJoinAndSelect('status.siteLocation', 'location')
+      .where(
+        `status.id = (
+        SELECT MAX(s2.id)
+        FROM site_status s2
+        WHERE s2."siteId" = status."siteId"
+      )`,
+      )
+      .getMany();
+  }
 }

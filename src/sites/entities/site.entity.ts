@@ -48,6 +48,9 @@ export class SitesSchema {
   @Column()
   updated_date: string;
 
+  @Column({ type: 'boolean', default: false })
+  need_ssl_renewal: boolean;
+
   @OneToMany(() => SiteLocationsSchema, (location) => location.site, {
     cascade: true,
   })

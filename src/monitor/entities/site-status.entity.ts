@@ -20,17 +20,26 @@ export class SiteStatusSchema {
   @Column({ type: 'boolean', default: true })
   backendUp: boolean;
 
-  @Column({ type: 'boolean', default: true })
-  overallUp: boolean;
+  @Column({ default: null })
+  frontendlastUp: string;
 
-  @Column({ type: 'date' })
-  lastChecked: Date;
+  @Column({ default: null })
+  backendlastDown: string;
+
+  @Column({ default: null })
+  frontendlastDown: string;
+
+  @Column({ default: null })
+  backendlastUp: string;
+
+  @Column()
+  lastChecked: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: string;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: string;
 
   @OneToOne(() => AllSiteLocationSchema, (location) => location.siteStatus, {
     onDelete: 'CASCADE',
