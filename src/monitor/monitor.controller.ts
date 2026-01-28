@@ -13,7 +13,7 @@ export class MonitorController {
     private readonly sitesSSLStatusService: SslMonitorService,
   ) {}
 
-  @Post('ssl/monitor')
+  @Post('ssl/re-trigger')
   monitorSSL() {
     return this.sitesSSLStatusService.monitorAllSites();
   }

@@ -64,7 +64,7 @@ export class SslMonitorService {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
 
-  async monitorAllSites(): Promise<void> {
+  async monitorAllSites(): Promise<{ success: boolean }> {
     const sites = await this.siteRepository.find();
     const now = new Date().toISOString();
 
@@ -144,8 +144,11 @@ export class SslMonitorService {
               await this.siteSSlStatusRepository.save(newEntity);
             }
           }
+
+          return { success: true };
         } catch (err) {
           this.logger.error(`Error monitoring ${url}: ${err.message}`);
+          throw new InternalServerErrorException('Failed to create site');
         }
       }
     }
