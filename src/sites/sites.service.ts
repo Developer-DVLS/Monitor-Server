@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SslMonitorService } from 'src/monitor/services/ssl-check.service';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { SitesSchema } from './entities/site.entity';
 import { AllSiteLocationSchema } from './entities/all-location-site.entity';
@@ -54,16 +54,22 @@ export class SitesService {
     }
   }
 
-  async findAll(): Promise<SitesSchema[]> {
+  async findAll(is_restaurant?: string): Promise<SitesSchema[]> {
+    console.log('Is Resturant', is_restaurant);
     try {
-      return await this.sitesRepo.find({
+      const queryOptions: FindManyOptions<SitesSchema> = {
         order: {
           name: 'ASC',
         },
         relations: {
           siteLocations: true,
         },
-      });
+      };
+      // if (is_restaurant !== undefined) {
+      //   queryOptions.where = { is_restaurant };
+      // }
+
+      return await this.sitesRepo.find(queryOptions);
     } catch (error) {
       console.error('Error fetching sites:', error);
       throw new InternalServerErrorException('Failed to fetch sites');

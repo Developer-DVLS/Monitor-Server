@@ -15,7 +15,7 @@ export class MonitorScheduler {
     private sendCardAlert: SmsService,
   ) {}
 
-  @Cron('*/10 * * * * *')
+  @Cron('*/45 * * * * *')
   async handleMonitorInterval() {
     this.logger.log('Starting monitoring cycle');
     const sites = await this.siteFetch.getSites();
@@ -30,67 +30,68 @@ export class MonitorScheduler {
     for (const status of statuses) {
       const { alertObject, recoveryObject } = status;
       if (alertObject.backend) {
-        this.sendCardAlert.sendAlertCard({
-          cause: 'Backend Down',
-          checked_url: status.siteLocation.backend_url,
-          incident_key: new Date()
-            .toISOString()
-            .concat(status.siteLocation.name),
-          incident_url: status.siteLocation.backend_url,
-          length: '',
-          monitor: '',
-          monitor_url: 'https://monitor-mydvls.vercel.app/',
-          response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
-          title: `🔴 Site's Backend Went Down: ${status.siteLocation.name}`,
-        });
+        // this.sendCardAlert.sendAlertCard({
+        //   cause: 'Backend Down',
+        //   checked_url: status.siteLocation.backend_url,
+        //   incident_key: new Date()
+        //     .toISOString()
+        //     .concat(status.siteLocation.name),
+        //   incident_url: status.siteLocation.backend_url,
+        //   length: '',
+        //   monitor: '',
+        //   monitor_url: 'https://monitor-mydvls.vercel.app/',
+        //   // response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
+        //   response: `Please Visit The Website`,
+        //   title: `🔴 Site's Backend Went Down: ${status.siteLocation.name}`,
+        // });
       }
 
       if (alertObject.frontend) {
-        this.sendCardAlert.sendAlertCard({
-          cause: 'Frontend Down',
-          checked_url: status.siteLocation.frontend_url,
-          incident_key: new Date()
-            .toISOString()
-            .concat(status.siteLocation.name),
-          incident_url: status.siteLocation.frontend_url,
-          length: '',
-          monitor: '',
-          monitor_url: 'https://monitor-mydvls.vercel.app/',
-          response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
-          title: `🔴 Site's Frontend Went Down: ${status.siteLocation.name}`,
-        });
+        // this.sendCardAlert.sendAlertCard({
+        //   cause: 'Frontend Down',
+        //   checked_url: status.siteLocation.frontend_url,
+        //   incident_key: new Date()
+        //     .toISOString()
+        //     .concat(status.siteLocation.name),
+        //   incident_url: status.siteLocation.frontend_url,
+        //   length: '',
+        //   monitor: '',
+        //   monitor_url: 'https://monitor-mydvls.vercel.app/',
+        //   response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
+        //   title: `🔴 Site's Frontend Went Down: ${status.siteLocation.name}`,
+        // });
       }
 
       if (recoveryObject.frontend) {
-        this.sendCardAlert.sendAlertCard({
-          cause: 'Frontend Back Online',
-          checked_url: status.siteLocation.frontend_url,
-          incident_key: new Date()
-            .toISOString()
-            .concat(status.siteLocation.name),
-          incident_url: status.siteLocation.frontend_url,
-          length: timeAgo(status.frontendlastDown),
-          monitor: '',
-          monitor_url: 'https://monitor-mydvls.vercel.app/',
-          response: '200 OK',
-          title: `🟢 Site's Frontend Back Online: ${status.siteLocation.name}`,
-        });
+        // this.sendCardAlert.sendAlertCard({
+        //   cause: 'Frontend Back Online',
+        //   checked_url: status.siteLocation.frontend_url,
+        //   incident_key: new Date()
+        //     .toISOString()
+        //     .concat(status.siteLocation.name),
+        //   incident_url: status.siteLocation.frontend_url,
+        //   length: timeAgo(status.frontendlastDown),
+        //   monitor: '',
+        //   monitor_url: 'https://monitor-mydvls.vercel.app/',
+        //   response: '200 OK',
+        //   title: `🟢 Site's Frontend Back Online: ${status.siteLocation.name}`,
+        // });
       }
 
       if (recoveryObject.backend) {
-        this.sendCardAlert.sendAlertCard({
-          cause: 'Backend Back Online',
-          checked_url: status.siteLocation.backend_url,
-          incident_key: new Date()
-            .toISOString()
-            .concat(status.siteLocation.name),
-          incident_url: status.siteLocation.backend_url,
-          length: timeAgo(status.backendlastDown),
-          monitor: '',
-          monitor_url: 'https://monitor-mydvls.vercel.app/',
-          response: '200 OK',
-          title: `🟢 Site's Backend Back Online: ${status.siteLocation.name}`,
-        });
+        // this.sendCardAlert.sendAlertCard({
+        //   cause: 'Backend Back Online',
+        //   checked_url: status.siteLocation.backend_url,
+        //   incident_key: new Date()
+        //     .toISOString()
+        //     .concat(status.siteLocation.name),
+        //   incident_url: status.siteLocation.backend_url,
+        //   length: timeAgo(status.backendlastDown),
+        //   monitor: '',
+        //   monitor_url: 'https://monitor-mydvls.vercel.app/',
+        //   response: '200 OK',
+        //   title: `🟢 Site's Backend Back Online: ${status.siteLocation.name}`,
+        // });
       }
     }
   }

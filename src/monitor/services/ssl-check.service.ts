@@ -64,9 +64,11 @@ export class SslMonitorService {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
 
-  async monitorAllSites(): Promise<{ success: boolean }> {
+  async monitorAllSites(): Promise<void> {
     const sites = await this.siteRepository.find();
     const now = new Date().toISOString();
+
+    this.logger.log('sites', sites);
 
     for (const site of sites) {
       const urls = [
@@ -75,9 +77,13 @@ export class SslMonitorService {
         site.printer_url,
       ].filter(Boolean);
 
+      this.logger.log('sites', urls);
+
       for (const url of urls) {
         try {
           const cert = await this.getSslDetails(url);
+
+          // this.logger.log(url, !!cert);
 
           if (cert) {
             const { issuer, valid_from, valid_to } = cert;
@@ -145,7 +151,7 @@ export class SslMonitorService {
             }
           }
 
-          return { success: true };
+          // return { success: true };
         } catch (err) {
           this.logger.error(`Error monitoring ${url}: ${err.message}`);
           throw new InternalServerErrorException('Failed to create site');

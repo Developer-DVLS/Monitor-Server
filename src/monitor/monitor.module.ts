@@ -30,14 +30,13 @@ import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.enti
   providers: [
     SiteFetchService,
     HealthCheckService,
-    MonitorScheduler,
+    // MonitorScheduler,
     SmsService,
     ServiceBusClientProvider,
     EmailService,
     SitesStatusService,
     SslMonitorService,
-
-    // SSLCheckScheduler,
+    SSLCheckScheduler,
   ],
   exports: [SslMonitorService, SmsService],
 })
