@@ -66,6 +66,7 @@ export class SslMonitorService {
 
   async monitorAllSites(): Promise<void> {
     const sites = await this.siteRepository.find();
+    const now = new Date().toISOString();
 
     for (const site of sites) {
       const urls = [
@@ -129,6 +130,7 @@ export class SslMonitorService {
               expiryDays: daysLeft,
               issuer: issuerName,
               site: site,
+              lastChecked: now,
             };
 
             if (previousSiteSSLStatus) {

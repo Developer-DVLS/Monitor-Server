@@ -39,6 +39,9 @@ export class SiteSSLStatusSchema {
   @Column()
   status: 'CRITICAL' | 'OK' | 'GOOD' | 'EXPIRED';
 
+  @Column({ default: '' })
+  lastChecked: string;
+
   @ManyToOne(() => SitesSchema, (site) => site.sslStatuses, {
     onDelete: 'CASCADE',
   })

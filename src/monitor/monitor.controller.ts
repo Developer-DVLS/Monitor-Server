@@ -13,6 +13,11 @@ export class MonitorController {
     private readonly sitesSSLStatusService: SslMonitorService,
   ) {}
 
+  @Post('ssl/monitor')
+  monitorSSL() {
+    return this.sitesSSLStatusService.monitorAllSites();
+  }
+
   @Get('status')
   getResponse() {
     return this.sitesStatusService.getAllSitesStatus();
