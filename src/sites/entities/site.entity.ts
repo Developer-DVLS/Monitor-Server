@@ -33,7 +33,7 @@ export class SitesSchema {
   @Column()
   backend_url: string;
 
-  @Column()
+  @Column({ nullable: true })
   printer_url: string;
 
   @Column({ default: true })

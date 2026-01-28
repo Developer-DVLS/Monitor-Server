@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -33,13 +32,17 @@ export class CreateSiteDto {
   @IsUrl({}, { message: 'Invalid backend URL' })
   backend_url: string;
 
-  @IsNotEmpty({ message: 'Printer URL is required' })
+  @IsOptional()
   @IsUrl({}, { message: 'Invalid printer URL' })
   printer_url: string;
 
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  is_restaurant?: boolean;
 
   @IsNotEmpty({ message: 'Location ID is required' })
   @IsNumber()

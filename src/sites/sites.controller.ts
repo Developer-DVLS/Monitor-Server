@@ -37,8 +37,10 @@ export class SitesController {
   }
 
   @Get('all-locations-sites')
-  findAllLocationsSites() {
-    return this.siteLocationsService.findAllLocationSites();
+  findAllLocationsSites(
+    @Query('is_restaurant') is_restaurant?: string | undefined,
+  ) {
+    return this.siteLocationsService.findAllLocationSites(is_restaurant);
   }
 
   @Post('locations')

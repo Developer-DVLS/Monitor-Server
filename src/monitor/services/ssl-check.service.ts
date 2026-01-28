@@ -74,7 +74,7 @@ export class SslMonitorService {
       const urls = [
         site.frontend_url,
         site.backend_url,
-        site.printer_url,
+        site?.printer_url,
       ].filter(Boolean);
 
       this.logger.log('sites', urls);
@@ -82,8 +82,6 @@ export class SslMonitorService {
       for (const url of urls) {
         try {
           const cert = await this.getSslDetails(url);
-
-          // this.logger.log(url, !!cert);
 
           if (cert) {
             const { issuer, valid_from, valid_to } = cert;

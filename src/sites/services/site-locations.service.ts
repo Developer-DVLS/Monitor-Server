@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateSiteLocationDto } from '../dto/create-site-location.dto';
 import { AllSiteLocationSchema } from '../entities/all-location-site.entity';
 import { SiteLocationsSchema } from '../entities/site-location.entity';
@@ -130,11 +130,23 @@ export class SiteLocationsService {
     }
   }
 
-  async findAllLocationSites(): Promise<AllSiteLocationSchema[]> {
+  async findAllLocationSites(
+    is_restaurant?: string | undefined,
+  ): Promise<AllSiteLocationSchema[]> {
     try {
-      return this.allLocationSiteRepo.find({
+      const queryOptions: FindManyOptions<AllSiteLocationSchema> = {
         order: { name: 'ASC' },
-      });
+      };
+
+      if (is_restaurant === `true` || is_restaurant === `false`) {
+        queryOptions.where = {
+          site: {
+            is_restaurant: is_restaurant === `true`,
+          },
+        };
+      }
+
+      return this.allLocationSiteRepo.find(queryOptions);
     } catch (error) {
       console.error('Error fetching sites:', error);
       throw new InternalServerErrorException('Failed to fetch sites');
