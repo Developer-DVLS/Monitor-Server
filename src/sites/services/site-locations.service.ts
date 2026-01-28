@@ -140,9 +140,7 @@ export class SiteLocationsService {
 
       if (is_restaurant === `true` || is_restaurant === `false`) {
         queryOptions.where = {
-          site: {
-            is_restaurant: is_restaurant === `true`,
-          },
+          is_restaurant: is_restaurant === `true`,
         };
       }
 

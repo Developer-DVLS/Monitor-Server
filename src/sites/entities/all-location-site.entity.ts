@@ -45,6 +45,9 @@ export class AllSiteLocationSchema {
   @Column({ nullable: true })
   ownerType: 'site' | 'site_location' | null;
 
+  @Column({ default: true })
+  is_restaurant: boolean;
+
   @OneToOne(() => SiteStatusSchema, (status) => status.siteLocation, {
     cascade: ['insert', 'update', 'remove'],
     nullable: true,
@@ -80,6 +83,7 @@ export class AllSiteLocationSchema {
       this.siteId = this.site.id;
       this.siteLocationId = null;
       this.siteLocation = undefined;
+      this.is_restaurant = this.site?.is_restaurant;
     } else if (this.siteLocation) {
       this.name = this.siteLocation.name;
       this.location = this.siteLocation.location;
@@ -91,6 +95,7 @@ export class AllSiteLocationSchema {
       this.frontend_url = this.siteLocation.site.frontend_url;
       this.printer_url = this.siteLocation.site?.printer_url;
       this.site = undefined;
+      this.is_restaurant = this.siteLocation.site?.is_restaurant;
     }
   }
 }
