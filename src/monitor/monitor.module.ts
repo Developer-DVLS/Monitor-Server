@@ -36,8 +36,9 @@ import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.enti
     EmailService,
     SitesStatusService,
     SslMonitorService,
-    SSLCheckScheduler,
+
+    // SSLCheckScheduler,
   ],
-  exports: [SslMonitorService],
+  exports: [SslMonitorService, SmsService],
 })
 export class MonitorModule {}

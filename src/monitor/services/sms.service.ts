@@ -15,33 +15,33 @@ export class SmsService {
     private config: ConfigService,
   ) {}
 
-  async sendAlertCard(
-    status: SiteStatusSchema,
-    payload: AlertCardPayload,
-  ): Promise<void> {
+  async sendAlertCard(payload: AlertCardPayload): Promise<void> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(
           this.config.get('SMS_MYDVLS') + '/teams_alerts/notify',
           payload,
           {
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-alert-secret': this.config.get('X_ALERT_SECRET'),
+            },
             timeout: 10000,
           },
         ),
       );
       if (response.status >= 200 && response.status < 300) {
         this.logger.log(
-          `Card request sent successfully for site ${status.siteLocation.name}`,
+          `Card request sent successfully for site ${payload.checked_url}`,
         );
       } else {
         this.logger.warn(
-          `SMS API responded with status ${response.status} for site ${status.siteLocation.name}`,
+          `SMS API responded with status ${response.status} for site ${payload.checked_url}`,
         );
       }
     } catch (error) {
       this.logger.error(
-        `Failed to send SMS for site ${status.siteLocation.name}:`,
+        `Failed to send SMS for site ${payload.checked_url}:`,
         error,
       );
       console.log('this is error', error);
@@ -60,8 +60,8 @@ export class SmsService {
   ): Promise<void> {
     const message =
       type === 'Recovery'
-        ? `🎉 Site ${status.siteLocation.name} Back Online!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nRecoverd At: ${status.lastChecked.toISOString()}`
-        : `🚨 Site ${status.siteLocation.name} DOWN!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nChecked: ${status.lastChecked.toISOString()}`;
+        ? `🎉 Site ${status.siteLocation.name} Back Online!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nRecoverd At: ${status.lastChecked}`
+        : `🚨 Site ${status.siteLocation.name} DOWN!\nFrontend: ${status.frontendUp ? 'UP 🟢' : 'DOWN 🔴'}\nBackend: ${status.backendUp ? 'UP 🟢' : 'DOWN 🔴'}\nChecked: ${status.lastChecked}`;
 
     const payload = {
       message,

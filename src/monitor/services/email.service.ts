@@ -113,7 +113,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
                 `
                 }
                 <td><a href="${siteDetails.siteLocation.frontend_url}" target="_blank">Frontend URL</a></td>
-                <td rowspan="2">${siteDetails.lastChecked.toISOString()}</td>
+                <td rowspan="2">${siteDetails.lastChecked}</td>
               </tr>
               <tr>
                 <td><strong>Backend</strong></td>

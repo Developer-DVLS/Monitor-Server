@@ -8,12 +8,15 @@ import * as tls from 'tls';
 import { Repository } from 'typeorm';
 import { SiteSSLStatusSchema } from '../entities/site-ssl-status.entity';
 import { SitesSchema } from 'src/sites/entities/site.entity';
+import { SmsService } from './sms.service';
 
 @Injectable()
 export class SslMonitorService {
   private readonly logger = new Logger(SslMonitorService.name);
 
   constructor(
+    private sendCardAlert: SmsService,
+
     @InjectRepository(SiteSSLStatusSchema)
     private siteSSlStatusRepository: Repository<SiteSSLStatusSchema>,
 
@@ -82,6 +85,25 @@ export class SslMonitorService {
             const issuerName = issuer?.O || '--';
 
             if (daysLeft <= 10 && daysLeft >= 0) {
+              if (!site.need_ssl_renewal) {
+                this.sendCardAlert.sendAlertCard({
+                  cause: 'SSL certficate expiring soon.',
+                  checked_url: `${url}`,
+                  incident_key: new Date().toISOString().concat(url),
+                  incident_url: `${url}`,
+                  length: '10 days left',
+                  monitor: '',
+                  monitor_url: 'https://monitor-mydvls.vercel.app/',
+                  response:
+                    'SSL certificate expiration days is less than 10 days.',
+                  title: `SSL Renewal Alert: ${site.name}`,
+                });
+                const updatedSite = this.siteRepository.merge(site, {
+                  ...site,
+                  need_ssl_renewal: true,
+                });
+                await this.siteRepository.save(updatedSite);
+              }
               sslWarningStatus = 'CRITICAL';
             } else if (daysLeft <= 30 && daysLeft >= 0) {
               sslWarningStatus = 'OK';

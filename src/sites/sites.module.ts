@@ -8,9 +8,12 @@ import { SiteSSLStatusSchema } from 'src/monitor/entities/site-ssl-status.entity
 import { SiteLocationsSchema } from './entities/site-location.entity';
 import { SiteLocationsService } from './services/site-locations.service';
 import { AllSiteLocationSchema } from './entities/all-location-site.entity';
+import { SmsService } from 'src/monitor/services/sms.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     TypeOrmModule.forFeature([
       SitesSchema,
       SiteSSLStatusSchema,
@@ -19,6 +22,7 @@ import { AllSiteLocationSchema } from './entities/all-location-site.entity';
     ]),
   ],
   providers: [
+    SmsService,
     SitesService,
     SslMonitorService,
     SiteLocationsService,
