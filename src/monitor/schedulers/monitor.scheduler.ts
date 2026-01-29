@@ -5,12 +5,17 @@ import { HealthCheckService } from '../services/health-check.service';
 import { SiteFetchService } from '../services/site-fetch.service';
 import { SmsService } from '../services/sms.service';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MonitorScheduler {
   private readonly logger = new Logger(MonitorScheduler.name);
 
   constructor(
+    @InjectRepository(SettingSchema)
+    private settingRepo: Repository<SettingSchema>,
     private siteFetch: SiteFetchService,
     private healthCheck: HealthCheckService,
     private sendCardAlert: SmsService,
@@ -18,8 +23,12 @@ export class MonitorScheduler {
   ) {}
 
   async handleMonitorInterval() {
+    const settings = await this.settingRepo.find();
     const sendAlertCardBool =
-      (this.config.get('SEND_ALERT_CARD') || 'true')?.toLowerCase() === 'true';
+      settings && settings.length
+        ? settings[0].send_site_status_alert
+        : (this.config.get('SEND_ALERT_CARD') || 'true')?.toLowerCase() ===
+          'true';
 
     this.logger.log(sendAlertCardBool);
 
@@ -103,7 +112,7 @@ export class MonitorScheduler {
     }
   }
 
-  @Cron('*/45 * * * * *')
+  @Cron('*/10 * * * * *')
   async hanldleMonitorSiteInterval() {
     this.handleMonitorInterval();
   }

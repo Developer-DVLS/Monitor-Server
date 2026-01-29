@@ -14,6 +14,7 @@ import { MonitorScheduler } from 'src/monitor/schedulers/monitor.scheduler';
 import { HealthCheckService } from 'src/monitor/services/health-check.service';
 import { SiteStatusSchema } from 'src/monitor/entities/site-status.entity';
 import { SiteFetchService } from 'src/monitor/services/site-fetch.service';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SiteFetchService } from 'src/monitor/services/site-fetch.service';
       SiteLocationsSchema,
       AllSiteLocationSchema,
       SiteStatusSchema,
+      SettingSchema,
     ]),
   ],
   providers: [
