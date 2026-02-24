@@ -15,6 +15,7 @@ import { SSLCheckScheduler } from './schedulers/ssl-check.scheduler';
 import { SslMonitorService } from './services/ssl-check.service';
 import { SiteSSLStatusSchema } from './entities/site-ssl-status.entity';
 import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.enti
       SitesSchema,
       SiteSSLStatusSchema,
       AllSiteLocationSchema,
+      SettingSchema,
     ]),
   ],
   controllers: [MonitorController],
@@ -36,8 +38,7 @@ import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.enti
     EmailService,
     SitesStatusService,
     SslMonitorService,
-
-    // SSLCheckScheduler,
+    SSLCheckScheduler,
   ],
   exports: [SslMonitorService, SmsService],
 })

@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SslMonitorService } from 'src/monitor/services/ssl-check.service';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { SitesSchema } from './entities/site.entity';
 import { AllSiteLocationSchema } from './entities/all-location-site.entity';
+import { MonitorScheduler } from 'src/monitor/schedulers/monitor.scheduler';
 
 @Injectable()
 export class SitesService {
@@ -18,7 +19,7 @@ export class SitesService {
     private sitesRepo: Repository<SitesSchema>,
     @InjectRepository(AllSiteLocationSchema)
     private allLocationSiteRepo: Repository<AllSiteLocationSchema>,
-
+    private siteMonitorService: MonitorScheduler,
     private siteSSLCheckService: SslMonitorService,
   ) {}
 
@@ -35,6 +36,7 @@ export class SitesService {
       const newCreateSite = await this.sitesRepo.save(newSite);
 
       this.siteSSLCheckService.monitorAllSites();
+      this.siteMonitorService.handleMonitorInterval();
 
       const allLoc = new AllSiteLocationSchema();
 
@@ -54,16 +56,21 @@ export class SitesService {
     }
   }
 
-  async findAll(): Promise<SitesSchema[]> {
+  async findAll(is_restaurant?: string): Promise<SitesSchema[]> {
     try {
-      return await this.sitesRepo.find({
+      const queryOptions: FindManyOptions<SitesSchema> = {
         order: {
           name: 'ASC',
         },
         relations: {
           siteLocations: true,
         },
-      });
+      };
+      if (is_restaurant === 'true' || is_restaurant === 'false') {
+        queryOptions.where = { is_restaurant: is_restaurant === 'true' };
+      }
+
+      return await this.sitesRepo.find(queryOptions);
     } catch (error) {
       console.error('Error fetching sites:', error);
       throw new InternalServerErrorException('Failed to fetch sites');

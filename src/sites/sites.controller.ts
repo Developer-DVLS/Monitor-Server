@@ -4,13 +4,16 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateSiteLocationDto } from './dto/create-site-location.dto';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { SiteLocationsService } from './services/site-locations.service';
 import { SitesService } from './sites.service';
+import { ParseOptionalBoolPipe } from 'src/pipes/parse-optional-bool.pipe';
 
 @Controller('sites')
 export class SitesController {
@@ -26,13 +29,18 @@ export class SitesController {
   }
 
   @Get()
-  findAll() {
-    return this.sitesService.findAll();
+  findAll(
+    @Query('is_restaurant')
+    is_restaurant?: string | undefined,
+  ) {
+    return this.sitesService.findAll(is_restaurant);
   }
 
   @Get('all-locations-sites')
-  findAllLocationsSites() {
-    return this.siteLocationsService.findAllLocationSites();
+  findAllLocationsSites(
+    @Query('is_restaurant') is_restaurant?: string | undefined,
+  ) {
+    return this.siteLocationsService.findAllLocationSites(is_restaurant);
   }
 
   @Post('locations')

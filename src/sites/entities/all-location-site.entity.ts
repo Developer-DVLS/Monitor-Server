@@ -30,7 +30,7 @@ export class AllSiteLocationSchema {
   @Column()
   backend_url: string;
 
-  @Column()
+  @Column({ nullable: true })
   printer_url: string;
 
   @Column({ default: 1 })
@@ -44,6 +44,9 @@ export class AllSiteLocationSchema {
 
   @Column({ nullable: true })
   ownerType: 'site' | 'site_location' | null;
+
+  @Column({ default: true })
+  is_restaurant: boolean;
 
   @OneToOne(() => SiteStatusSchema, (status) => status.siteLocation, {
     cascade: ['insert', 'update', 'remove'],
@@ -75,11 +78,12 @@ export class AllSiteLocationSchema {
       this.location_id = this.site.location_id;
       this.backend_url = this.site.backend_url;
       this.frontend_url = this.site.frontend_url;
-      this.printer_url = this.site.printer_url;
+      this.printer_url = this.site?.printer_url;
       this.ownerType = 'site';
       this.siteId = this.site.id;
       this.siteLocationId = null;
       this.siteLocation = undefined;
+      this.is_restaurant = this.site?.is_restaurant;
     } else if (this.siteLocation) {
       this.name = this.siteLocation.name;
       this.location = this.siteLocation.location;
@@ -89,8 +93,9 @@ export class AllSiteLocationSchema {
       this.siteId = null;
       this.backend_url = this.siteLocation.site.backend_url;
       this.frontend_url = this.siteLocation.site.frontend_url;
-      this.printer_url = this.siteLocation.site.printer_url;
+      this.printer_url = this.siteLocation.site?.printer_url;
       this.site = undefined;
+      this.is_restaurant = this.siteLocation.site?.is_restaurant;
     }
   }
 }

@@ -33,7 +33,7 @@ export class SitesSchema {
   @Column()
   backend_url: string;
 
-  @Column()
+  @Column({ nullable: true })
   printer_url: string;
 
   @Column({ default: true })
@@ -47,6 +47,9 @@ export class SitesSchema {
 
   @Column()
   updated_date: string;
+
+  @Column({ default: true })
+  is_restaurant: boolean;
 
   @Column({ type: 'boolean', default: false })
   need_ssl_renewal: boolean;

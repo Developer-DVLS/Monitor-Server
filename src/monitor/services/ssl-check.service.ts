@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { SiteSSLStatusSchema } from '../entities/site-ssl-status.entity';
 import { SitesSchema } from 'src/sites/entities/site.entity';
 import { SmsService } from './sms.service';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
 
 @Injectable()
 export class SslMonitorService {
@@ -16,6 +17,9 @@ export class SslMonitorService {
 
   constructor(
     private sendCardAlert: SmsService,
+
+    @InjectRepository(SettingSchema)
+    private settingRepo: Repository<SettingSchema>,
 
     @InjectRepository(SiteSSLStatusSchema)
     private siteSSlStatusRepository: Repository<SiteSSLStatusSchema>,
@@ -65,13 +69,19 @@ export class SslMonitorService {
   }
 
   async monitorAllSites(): Promise<void> {
+    const setting = await this.settingRepo.find();
     const sites = await this.siteRepository.find();
+    const now = new Date().toISOString();
+    const daysLeftThreshold =
+      setting && setting.length ? setting[0].ssl_status_days_threshold : 10;
+
+    this.logger.log('sites', sites);
 
     for (const site of sites) {
       const urls = [
         site.frontend_url,
         site.backend_url,
-        site.printer_url,
+        site?.printer_url,
       ].filter(Boolean);
 
       for (const url of urls) {
@@ -84,7 +94,7 @@ export class SslMonitorService {
             let sslWarningStatus = null;
             const issuerName = issuer?.O || '--';
 
-            if (daysLeft <= 10 && daysLeft >= 0) {
+            if (daysLeft <= daysLeftThreshold && daysLeft >= 0) {
               if (!site.need_ssl_renewal) {
                 this.sendCardAlert.sendAlertCard({
                   cause: 'SSL certficate expiring soon.',
@@ -129,6 +139,7 @@ export class SslMonitorService {
               expiryDays: daysLeft,
               issuer: issuerName,
               site: site,
+              lastChecked: now,
             };
 
             if (previousSiteSSLStatus) {
@@ -142,8 +153,11 @@ export class SslMonitorService {
               await this.siteSSlStatusRepository.save(newEntity);
             }
           }
+
+          // return { success: true };
         } catch (err) {
           this.logger.error(`Error monitoring ${url}: ${err.message}`);
+          throw new InternalServerErrorException('Failed to create site');
         }
       }
     }

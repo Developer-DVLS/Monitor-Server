@@ -11,6 +11,7 @@ import { ServiceBusClientProvider } from './providers/ServiceBusClientProvider';
 import { SitesModule } from './sites/sites.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiSecretGuard } from './gaurds/api-secret.guard';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ApiSecretGuard } from './gaurds/api-secret.guard';
     }),
     MonitorModule,
     SitesModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

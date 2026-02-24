@@ -10,6 +10,11 @@ import { SiteLocationsService } from './services/site-locations.service';
 import { AllSiteLocationSchema } from './entities/all-location-site.entity';
 import { SmsService } from 'src/monitor/services/sms.service';
 import { HttpModule } from '@nestjs/axios';
+import { MonitorScheduler } from 'src/monitor/schedulers/monitor.scheduler';
+import { HealthCheckService } from 'src/monitor/services/health-check.service';
+import { SiteStatusSchema } from 'src/monitor/entities/site-status.entity';
+import { SiteFetchService } from 'src/monitor/services/site-fetch.service';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
 
 @Module({
   imports: [
@@ -19,14 +24,19 @@ import { HttpModule } from '@nestjs/axios';
       SiteSSLStatusSchema,
       SiteLocationsSchema,
       AllSiteLocationSchema,
+      SiteStatusSchema,
+      SettingSchema,
     ]),
   ],
   providers: [
+    SiteFetchService,
     SmsService,
     SitesService,
     SslMonitorService,
     SiteLocationsService,
     AllSiteLocationSchema,
+    HealthCheckService,
+    MonitorScheduler,
   ],
   controllers: [SitesController],
   exports: [SitesService],
