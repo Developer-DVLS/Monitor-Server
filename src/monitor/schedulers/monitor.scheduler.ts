@@ -72,7 +72,8 @@ export class MonitorScheduler {
             length: '',
             monitor: '',
             monitor_url: 'https://monitor-mydvls.vercel.app/',
-            response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
+            // response: '502 Bad Gateway nginx/1.18.0 (Ubuntu)',
+            response: `Please Visit The Website`,
             title: `🔴 Site's Frontend Went Down: ${status.siteLocation.name}`,
           });
         }

@@ -12,6 +12,7 @@ import { timeout } from 'rxjs/operators';
 import { AllSiteLocationSchema } from 'src/sites/entities/all-location-site.entity';
 import { Repository } from 'typeorm';
 import { SiteStatusSchema } from '../entities/site-status.entity';
+import { SettingSchema } from 'src/settings/entities/setting.entity';
 
 interface HealthCheckResult extends SiteStatusSchema {
   alertObject: {
@@ -32,11 +33,19 @@ export class HealthCheckService {
     private httpService: HttpService,
 
     @InjectRepository(SiteStatusSchema)
+    private settingRepo: Repository<SettingSchema>,
+
+    @InjectRepository(SiteStatusSchema)
     private statusRepo: Repository<SiteStatusSchema>,
   ) {}
 
   async checkSite(site: AllSiteLocationSchema): Promise<HealthCheckResult> {
     try {
+      const settingsConfig = await this.settingRepo.find();
+      const settingsCount =
+        settingsConfig && settingsConfig.length
+          ? settingsConfig[0].site_status_count_threshold
+          : 0;
       const start = Date.now();
 
       const frontend$ = this.pingUrl(site.frontend_url).then((up) => ({
@@ -66,6 +75,8 @@ export class HealthCheckService {
       const currentBackendStatus = backend.backendUp;
       const previousFrontendStatus = previousStatus?.frontendUp;
       const previousBackendStatus = previousStatus?.backendUp;
+      const previousBackendCount = previousStatus?.backend_count;
+      const previousFrontendCount = previousStatus?.frontend_count;
 
       let healthCheckResult: HealthCheckResult = null;
 
@@ -92,21 +103,29 @@ export class HealthCheckService {
       };
 
       if (previousStatus) {
+        const frontendCountCycle = previousFrontendCount + 1;
+        const backendCountCycle = previousBackendCount + 1;
         if (currentBackendStatus && !previousBackendStatus) {
           statusEntity.backendlastUp = now;
           recoveryObject.backend = true;
         }
         if (!currentBackendStatus && previousBackendStatus) {
-          statusEntity.backendlastDown = now;
-          alertObject.backend = true;
+          if (backendCountCycle <= settingsCount) {
+            statusEntity.backendlastDown = now;
+            alertObject.backend = true;
+            statusEntity.backend_count = backendCountCycle;
+          }
         }
         if (currentFrontendStatus && !previousFrontendStatus) {
           statusEntity.frontendlastUp = now;
           recoveryObject.frontend = true;
         }
         if (!currentFrontendStatus && previousFrontendStatus) {
-          statusEntity.frontendlastDown = now;
-          alertObject.frontend = true;
+          if (frontendCountCycle <= settingsCount) {
+            statusEntity.frontendlastDown = now;
+            alertObject.frontend = true;
+            statusEntity.frontend_count = frontendCountCycle;
+          }
         }
       } else {
         if (currentBackendStatus) {

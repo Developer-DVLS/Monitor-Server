@@ -4,11 +4,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.port || 3000;
+  const port = process.env.port || 3022;
   app.setGlobalPrefix('api');
-  app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || false,
-  });
+  // app.enableCors({
+  //   origin: process.env.ALLOWED_ORIGINS?.split(',') || false,
+  // });
+   app.enableCors();
 
   app.useGlobalPipes(
     new ValidationPipe({

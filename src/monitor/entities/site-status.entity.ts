@@ -38,6 +38,12 @@ export class SiteStatusSchema {
   @CreateDateColumn()
   createdAt: string;
 
+  @Column({ default: 0 })
+  frontend_count: number;
+
+  @Column({ default: 0 })
+  backend_count: number;
+
   @UpdateDateColumn()
   updatedAt: string;
 
